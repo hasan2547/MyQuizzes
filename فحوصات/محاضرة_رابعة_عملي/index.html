@@ -1,0 +1,104 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>اختبار MCQ</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&family=Cairo:wght@400;700&display=swap');
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; margin: 0; padding: 0; }
+        * { -ms-overflow-style: none; scrollbar-width: none; }
+        *::-webkit-scrollbar { display: none; }
+        body { font-family: 'Roboto', sans-serif; background-color: #121212; color: #e0e0e0; display: flex; justify-content: center; height: 100vh; height: 100dvh; overflow: hidden; touch-action: manipulation; }
+        .quiz-container { background-color: #1e1e1e; width: 100%; height: 100%; display: flex; flex-direction: column; padding: 20px 15px; max-width: 600px; margin: 0 auto; border-left: 1px solid #333; border-right: 1px solid #333; }
+        .header { display: flex; justify-content: space-between; align-items: center; padding-bottom: 15px; border-bottom: 1px solid #333; margin-bottom: 20px; flex-shrink: 0; }
+        .q-count { color: #888; font-size: 0.9rem; font-weight: 500; }
+        .subject-title { color: #00e676; font-family: 'Cairo', sans-serif; font-weight: bold; font-size: 1.1rem; text-align: center;}
+        .timer-box { background-color: #2c2c2c; color: #fff; padding: 6px 12px; border-radius: 4px; font-weight: bold; border: 1px solid #444; min-width: 70px; text-align: center; }
+        .timer-box.warning { background-color: #4a1818; color: #ff6b6b; border-color: #ff6b6b; }
+        .question-area { flex-grow: 1; overflow-y: auto; padding-bottom: 20px; }
+        .question-text { font-family: 'Roboto', sans-serif; font-size: 1.1rem; font-weight: bold; margin-bottom: 25px; color: #ffffff; text-align: left; line-height: 1.5; direction: ltr; word-break: break-word;}
+        .options-list { list-style: none; padding: 0; }
+        .option { background-color: #2c2c2c; border: 1px solid #444; border-radius: 8px; padding: 15px; margin-bottom: 15px; cursor: pointer; font-size: 1rem; text-align: left; transition: background 0.2s; color: #ddd; display: flex; align-items: flex-start; gap: 10px; direction: ltr; }
+        .option:active { background-color: #444; }
+        .opt-letter { font-weight: bold; color: #2979ff; min-width: 25px; display: inline-block; }
+        .opt-text { flex: 1; word-wrap: break-word; word-break: break-word; line-height: 1.4; }
+        .option.correct { background-color: #1b5e20 !important; border-color: #00e676 !important; color: #fff; }
+        .option.correct .opt-letter { color: #fff; }
+        .option.wrong { background-color: #b71c1c !important; border-color: #ff1744 !important; color: #fff; }
+        .option.wrong .opt-letter { color: #fff; }
+        .disabled { pointer-events: none; }
+        .navigation { margin-top: auto; display: flex; justify-content: space-between; padding-top: 15px; border-top: 1px solid #333; flex-shrink: 0; }
+        button { background: #2979ff; color: white; border: none; padding: 15px 30px; border-radius: 6px; font-weight: bold; text-transform: uppercase; letter-spacing: 1px; box-shadow: 0 4px 6px rgba(0,0,0,0.3); cursor: pointer;}
+        button:disabled { background-color: #444; color: #888; box-shadow: none; cursor: not-allowed; }
+        .result-screen { display: none; text-align: center; height: 100%; overflow-y: auto; width: 100%;}
+        .score-box { background: #2c2c2c; padding: 20px; border-radius: 10px; margin-bottom: 20px; border: 1px solid #444; }
+        .big-score { font-size: 3rem; font-weight: bold; color: #2979ff; display: block; }
+        .review-section { text-align: left; margin-top: 10px; direction: ltr; }
+        .review-item { background: #1e1e1e; border-bottom: 1px solid #333; padding: 15px 5px; }
+        .review-q-text { font-family: 'Roboto', sans-serif; color: #fff; margin-bottom: 10px; font-size: 1rem; font-weight: bold; word-break: break-word;}
+    </style>
+</head>
+<body>
+<div class="quiz-container">
+    <div id="quiz-screen" style="display:flex; flex-direction:column; height:100%;">
+        <div class="header" id="main-header">
+            <span class="q-count" id="q-progress"></span>
+
+            
+            <div id="titles-container" style="display:flex; flex-direction:column; align-items:center;">
+                <span class="subject-title" style="color:#2979ff; font-family:'Cairo'; font-size:1.2rem;">📄 اختبار MCQ</span>
+            </div>
+            
+
+            <div class="timer-box" id="timer-box"><span id="timer">60</span>s</div>
+        </div>
+        <div class="question-area" id="main-q-area">
+            <div class="question-text" id="question-text"></div>
+            <ul class="options-list" id="options-list"></ul>
+        </div>
+        <div class="navigation" id="main-nav">
+            <button id="prev-btn" onclick="prevQuestion()" disabled>Prev</button>
+            <button id="next-btn" onclick="nextQuestion()">Next</button>
+        </div>
+
+        
+
+    </div>
+    <div id="result-screen" class="result-screen">
+        <h2 style="color: #fff; margin-top:0;">Quiz Results</h2>
+        <div class="score-box">
+            <span class="big-score" id="score-text">0%</span>
+            <p id="score-detail" style="color:#aaa; margin:5px 0 0;">0 / 0 Correct</p>
+        </div>
+        <div class="review-section" id="review-list"></div>
+        <div style="padding: 20px 0;">
+
+            
+
+            <button onclick="restartQuiz()" style="width:100%; background:#00c853;">Restart</button>
+        </div>
+    </div>
+</div>
+<script>
+    const questions = [{"answer": 1, "options": ["In all brain imaging procedures.", "When contrast material will be used.", "Only when examining advanced brain tumors.", "When the patient is diabetic."], "question": "Which of the following conditions requires the patient to fast for a few hours before a CT scan of the head?"}, {"answer": 2, "options": ["Reducing the slice thickness to 5 mm.", "Instructing the patient to close their eyes tightly.", "Setting the scan angle parallel to the base of the skull.", "Centering the table height at the glabella."], "question": "What technique is used to reduce or avoid ocular lens exposure during a brain CT scan?"}, {"answer": 0, "options": ["External Auditory Meatus (EAM)", "Nasion", "Gnathion", "Splenium"], "question": "Where should the table height be centered when preparing a patient for a head CT scan?"}, {"answer": 1, "options": ["Between 1 and 3 mm", "Between 5 and 10 mm", "Between 10 and 15 mm", "More than 20 mm"], "question": "What is the general range for slice thickness in a routine brain CT scan?"}, {"answer": 1, "options": ["Automatic increase in radiation dose", "Blurring of the images", "The scanner automatically stops", "Alteration of the scan angle"], "question": "What is the direct consequence of even a small patient movement during a CT scan?"}, {"answer": 2, "options": ["A magnetic field", "Radio waves", "An X-ray beam", "A laser localizer"], "question": "What revolves around the patient\u0027s head to create a series of images in a CT scanner?"}, {"answer": 1, "options": ["Simple skull fractures", "Problems with the blood vessels", "Internal intraocular pressure", "Kidney function before contrast"], "question": "According to the text, a brain MRI is particularly helpful in evaluating which of the following?"}, {"answer": 1, "options": ["Head Coils", "Ear plugs", "Immobilization pads", "The scanner\u0027s built-in microphone"], "question": "Which equipment is specifically used to protect the patient from the loud noise generated by the MRI scanner?"}, {"answer": 2, "options": ["Over the Nasion", "Over the External Auditory Meatus (EAM)", "Over the Glabella", "Over the Gnathion"], "question": "When positioning a patient in the MRI scanner, where should the laser beam localizer be centered?"}, {"answer": 1, "options": ["Glabella in the midline", "Nasion in the midline", "The corpus callosum", "Gnathion in the midline"], "question": "In the MRI routine brain protocol, where should the Field of View (FOV) be centered for the Topogram (landmark)?"}, {"answer": 1, "options": ["Glabella and Nasion", "Genu and Splenium", "Cerebrum and Cerebellum", "Sagittal and Axial"], "question": "Which two parts of the corpus callosum are used as reference points in the routine brain MRI protocol?"}, {"answer": 1, "options": ["Coronal plane", "Sagittal plane", "Axial plane", "Oblique plane"], "question": "On which plane is the axial localizer plane typically plotted?"}, {"answer": 2, "options": ["Perpendicular to the corpus callosum", "Parallel to the midline of the brain", "Parallel to the line joining the genu and splenium of the corpus callosum", "Parallel to the base of the skull"], "question": "How should the position block be oriented when planning the axial localizer plane in a brain MRI?"}, {"answer": 2, "options": ["Only on the coronal plane", "Only on the axial plane", "On either the coronal or axial plane", "On both the sagittal and axial planes"], "question": "According to the routine brain protocol, on which planes can the sagittal localizer be plotted?"}, {"answer": 2, "options": ["Perpendicular to the corpus callosum", "Parallel to the line joining the genu and splenium", "Parallel to the mid line of the brain", "Parallel to the External Auditory Meatus"], "question": "How should the position block be placed when plotting the sagittal localizer plane?"}, {"answer": 1, "options": ["Axial plane", "Sagittal plane", "Coronal plane", "Topogram"], "question": "On which plane is the coronal localizer plane plotted?"}, {"answer": 1, "options": ["Parallel to the corpus callosum", "Perpendicular to the corpus callosum", "Parallel to the midline of the brain", "At a 45-degree angle to the Nasion"], "question": "How should the position block be oriented when planning the coronal localizer plane?"}, {"answer": 1, "options": ["Through hand signals only", "Using a microphone and speakers", "Via an internal display screen", "By pausing the scan repeatedly"], "question": "How can the medical team communicate with the patient inside the CT scanner for security and guidance?"}, {"answer": 1, "options": ["To determine the scanner\u0027s rotation speed", "To perform an allergy test and kidney function test if using contrast media", "To decide the appropriate slice thickness", "To alter the scan angle away from the chest"], "question": "Why must the radiographer ask the patient about diseases such as asthma or diabetes before a CT scan?"}, {"answer": 1, "options": ["It provides colorful 3D images", "It can reveal internal injuries and bleeding quickly enough to help save lives", "It does not use any radiation", "It can be performed while the patient is moving"], "question": "What is a key advantage of using CT for head injuries in emergency cases?"}, {"answer": 2, "options": ["Glabella", "Nasion", "Gnathion", "Genu"], "question": "Which of the following cranial landmarks is located lowest on the face?"}, {"answer": 2, "options": ["Squeeze their eyes shut", "Count backwards out loud", "Hold their breath", "Press an emergency button"], "question": "During the CT scan, what might the doctor ask the patient to do for a short time to minimize motion?"}, {"answer": 2, "options": ["To transmit radio signals to the brain", "To block the noise of the scanner", "To keep the patient completely still during the test", "To adjust the table to the correct height"], "question": "What is the purpose of using immobilization pads and straps during an MRI scan?"}, {"answer": 1, "options": ["Sagittal, Oblique, Transverse", "Axial, Sagittal, Coronal", "Superior, Inferior, Lateral", "Coronal, Anterior, Posterior"], "question": "The \"3 plane localizer\" in the routine brain protocol consists of which three planes?"}, {"answer": 1, "options": ["Prone with feet first", "Supine with head first", "Supine with feet first", "Lateral with head first"], "question": "What is the standard patient positioning for both CT and MRI brain scans according to the text?"}];
+    const letters = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'];
+    let currentQuestionIndex = 0; let score = 0; let userAnswers = new Array(questions.length).fill(null); let timeLeft = 60; let timerInterval;
+    function startTimer() { timeLeft = 60; document.getElementById('timer').innerText = timeLeft; document.getElementById('timer-box').classList.remove('warning'); clearInterval(timerInterval); timerInterval = setInterval(() => { timeLeft--; document.getElementById('timer').innerText = timeLeft; if (timeLeft <= 10) document.getElementById('timer-box').classList.add('warning'); if (timeLeft === 0) { clearInterval(timerInterval); handleTimeUp(); } }, 1000); }
+    function handleTimeUp() { userAnswers[currentQuestionIndex] = -1; const options = document.getElementById('options-list').children; for (let i = 0; i < options.length; i++) { options[i].classList.add('disabled'); options[i].style.opacity = "0.5"; } nextQuestion(); }
+    function loadQuestion() {
+        if(questions.length === 0) { document.getElementById('main-q-area').innerHTML = `<div style="text-align:center; color:#888; margin-top:50px;"><h2 style="color:#2979ff;">المحاضرة فارغة 📭</h2><p style="margin-top:10px; font-family:'Cairo'; line-height: 1.6;">لم يتم إضافة أي أسئلة بعد.</p></div>`; document.getElementById('main-nav').style.display = 'none'; document.getElementById('timer-box').style.display = 'none'; document.getElementById('q-progress').innerText = "0 / 0"; return; }
+        const currentQuestion = questions[currentQuestionIndex]; const qText = currentQuestion.question.replace(/^\d+[\.\-]\s*/, ''); document.getElementById('question-text').innerText = (currentQuestionIndex + 1) + ". " + qText; document.getElementById('q-progress').innerText = `${currentQuestionIndex + 1} / ${questions.length}`; const optionsList = document.getElementById('options-list'); optionsList.innerHTML = ''; const isAnswered = userAnswers[currentQuestionIndex] !== null;
+        currentQuestion.options.forEach((option, index) => { const li = document.createElement('li'); li.classList.add('option'); const letter = letters[index] || ''; li.innerHTML = `<span class="opt-letter">${letter}</span> <span class="opt-text">${option}</span>`; if (isAnswered) { li.classList.add('disabled'); if (index === currentQuestion.answer) li.classList.add('correct'); if (index === userAnswers[currentQuestionIndex] && index !== currentQuestion.answer) li.classList.add('wrong'); } else { li.onclick = () => selectOption(index, li); } optionsList.appendChild(li); });
+        document.getElementById('prev-btn').disabled = currentQuestionIndex === 0; document.getElementById('next-btn').innerText = currentQuestionIndex === questions.length - 1 ? "Finish" : "Next"; if (!isAnswered) startTimer(); else { clearInterval(timerInterval); document.getElementById('timer').innerText = "-"; }
+    }
+    function selectOption(selectedIndex, element) { clearInterval(timerInterval); userAnswers[currentQuestionIndex] = selectedIndex; const currentQuestion = questions[currentQuestionIndex]; const options = document.getElementById('options-list').children; for (let i = 0; i < options.length; i++) options[i].classList.add('disabled'); if (selectedIndex === currentQuestion.answer) { element.classList.add('correct'); } else { element.classList.add('wrong'); setTimeout(() => { options[currentQuestion.answer].classList.add('correct'); }, 1000); } }
+    function nextQuestion() { if (currentQuestionIndex < questions.length - 1) { currentQuestionIndex++; loadQuestion(); } else { showResults(); } }
+    function prevQuestion() { if (currentQuestionIndex > 0) { currentQuestionIndex--; loadQuestion(); } }
+    function showResults() { clearInterval(timerInterval); document.getElementById('quiz-screen').style.display = 'none'; document.getElementById('result-screen').style.display = 'block'; score = 0; const reviewList = document.getElementById('review-list'); reviewList.innerHTML = ''; questions.forEach((q, index) => { const userAnswer = userAnswers[index]; if (userAnswer === q.answer) score++; const reviewItem = document.createElement('div'); reviewItem.classList.add('review-item'); const qText = q.question.replace(/^\d+[\.\-]\s*/, ''); let optionsHtml = ''; q.options.forEach((opt, optIndex) => { let style = 'padding:10px; margin-bottom:5px; border-radius:4px; font-family:Roboto; display:flex; gap:10px; text-align:left;'; let letterStyle = 'font-weight:bold; min-width:20px;'; if (optIndex === q.answer) style += 'background: #1b5e20; border: 1px solid #00e676; color:white;'; else if (optIndex === userAnswer && userAnswer !== q.answer) style += 'background: #b71c1c; border: 1px solid #ff1744; color:white;'; else style += 'background: #2c2c2c; color:#888; border: 1px solid #444;'; optionsHtml += `<div style="${style}"><span style="${letterStyle}">${letters[optIndex]}</span><span style="flex:1; word-wrap:break-word;">${opt}</span></div>`; }); reviewItem.innerHTML = `<div class="review-q-text">${index + 1}. ${qText}</div><div style="direction: ltr;">${optionsHtml}</div>`; reviewList.appendChild(reviewItem); }); const percentage = Math.round((score / questions.length) * 100); document.getElementById('score-text').innerText = percentage + "%"; document.getElementById('score-detail').innerText = `${score} / ${questions.length} Correct`; }
+    function restartQuiz() { currentQuestionIndex = 0; score = 0; userAnswers = new Array(questions.length).fill(null); document.getElementById('quiz-screen').style.display = 'flex'; document.getElementById('result-screen').style.display = 'none'; loadQuestion(); }
+    loadQuestion();
+</script>
+</body>
+</html>
