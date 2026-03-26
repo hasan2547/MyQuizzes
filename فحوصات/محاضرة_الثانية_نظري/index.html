@@ -1,0 +1,104 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>اختبار MCQ</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&family=Cairo:wght@400;700&display=swap');
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; margin: 0; padding: 0; }
+        * { -ms-overflow-style: none; scrollbar-width: none; }
+        *::-webkit-scrollbar { display: none; }
+        body { font-family: 'Roboto', sans-serif; background-color: #121212; color: #e0e0e0; display: flex; justify-content: center; height: 100vh; height: 100dvh; overflow: hidden; touch-action: manipulation; }
+        .quiz-container { background-color: #1e1e1e; width: 100%; height: 100%; display: flex; flex-direction: column; padding: 20px 15px; max-width: 600px; margin: 0 auto; border-left: 1px solid #333; border-right: 1px solid #333; }
+        .header { display: flex; justify-content: space-between; align-items: center; padding-bottom: 15px; border-bottom: 1px solid #333; margin-bottom: 20px; flex-shrink: 0; }
+        .q-count { color: #888; font-size: 0.9rem; font-weight: 500; }
+        .subject-title { color: #00e676; font-family: 'Cairo', sans-serif; font-weight: bold; font-size: 1.1rem; text-align: center;}
+        .timer-box { background-color: #2c2c2c; color: #fff; padding: 6px 12px; border-radius: 4px; font-weight: bold; border: 1px solid #444; min-width: 70px; text-align: center; }
+        .timer-box.warning { background-color: #4a1818; color: #ff6b6b; border-color: #ff6b6b; }
+        .question-area { flex-grow: 1; overflow-y: auto; padding-bottom: 20px; }
+        .question-text { font-family: 'Roboto', sans-serif; font-size: 1.1rem; font-weight: bold; margin-bottom: 25px; color: #ffffff; text-align: left; line-height: 1.5; direction: ltr; word-break: break-word;}
+        .options-list { list-style: none; padding: 0; }
+        .option { background-color: #2c2c2c; border: 1px solid #444; border-radius: 8px; padding: 15px; margin-bottom: 15px; cursor: pointer; font-size: 1rem; text-align: left; transition: background 0.2s; color: #ddd; display: flex; align-items: flex-start; gap: 10px; direction: ltr; }
+        .option:active { background-color: #444; }
+        .opt-letter { font-weight: bold; color: #2979ff; min-width: 25px; display: inline-block; }
+        .opt-text { flex: 1; word-wrap: break-word; word-break: break-word; line-height: 1.4; }
+        .option.correct { background-color: #1b5e20 !important; border-color: #00e676 !important; color: #fff; }
+        .option.correct .opt-letter { color: #fff; }
+        .option.wrong { background-color: #b71c1c !important; border-color: #ff1744 !important; color: #fff; }
+        .option.wrong .opt-letter { color: #fff; }
+        .disabled { pointer-events: none; }
+        .navigation { margin-top: auto; display: flex; justify-content: space-between; padding-top: 15px; border-top: 1px solid #333; flex-shrink: 0; }
+        button { background: #2979ff; color: white; border: none; padding: 15px 30px; border-radius: 6px; font-weight: bold; text-transform: uppercase; letter-spacing: 1px; box-shadow: 0 4px 6px rgba(0,0,0,0.3); cursor: pointer;}
+        button:disabled { background-color: #444; color: #888; box-shadow: none; cursor: not-allowed; }
+        .result-screen { display: none; text-align: center; height: 100%; overflow-y: auto; width: 100%;}
+        .score-box { background: #2c2c2c; padding: 20px; border-radius: 10px; margin-bottom: 20px; border: 1px solid #444; }
+        .big-score { font-size: 3rem; font-weight: bold; color: #2979ff; display: block; }
+        .review-section { text-align: left; margin-top: 10px; direction: ltr; }
+        .review-item { background: #1e1e1e; border-bottom: 1px solid #333; padding: 15px 5px; }
+        .review-q-text { font-family: 'Roboto', sans-serif; color: #fff; margin-bottom: 10px; font-size: 1rem; font-weight: bold; word-break: break-word;}
+    </style>
+</head>
+<body>
+<div class="quiz-container">
+    <div id="quiz-screen" style="display:flex; flex-direction:column; height:100%;">
+        <div class="header" id="main-header">
+            <span class="q-count" id="q-progress"></span>
+
+            
+            <div id="titles-container" style="display:flex; flex-direction:column; align-items:center;">
+                <span class="subject-title" style="color:#2979ff; font-family:'Cairo'; font-size:1.2rem;">📄 اختبار MCQ</span>
+            </div>
+            
+
+            <div class="timer-box" id="timer-box"><span id="timer">60</span>s</div>
+        </div>
+        <div class="question-area" id="main-q-area">
+            <div class="question-text" id="question-text"></div>
+            <ul class="options-list" id="options-list"></ul>
+        </div>
+        <div class="navigation" id="main-nav">
+            <button id="prev-btn" onclick="prevQuestion()" disabled>Prev</button>
+            <button id="next-btn" onclick="nextQuestion()">Next</button>
+        </div>
+
+        
+
+    </div>
+    <div id="result-screen" class="result-screen">
+        <h2 style="color: #fff; margin-top:0;">Quiz Results</h2>
+        <div class="score-box">
+            <span class="big-score" id="score-text">0%</span>
+            <p id="score-detail" style="color:#aaa; margin:5px 0 0;">0 / 0 Correct</p>
+        </div>
+        <div class="review-section" id="review-list"></div>
+        <div style="padding: 20px 0;">
+
+            
+
+            <button onclick="restartQuiz()" style="width:100%; background:#00c853;">Restart</button>
+        </div>
+    </div>
+</div>
+<script>
+    const questions = [{"answer": 2, "options": ["2-mm", "5-mm", "10-mm", "15-mm"], "question": "What is the standard slice thickness for the upper part of the brain (towards the vertex) in a routine CT?"}, {"answer": 1, "options": ["Acute head injury", "Suspected intracranial infection", "Routine dementia screening", "Acute subarachnoid hemorrhage"], "question": "In which clinical scenario is the use of contrast enhancement considered \"mandatory\" according to the text?"}, {"answer": 1, "options": ["+30 HU", "+45 HU", "+70 HU", "+1000 HU"], "question": "Which of the following is an approximate Hounsfield Unit (HU) for Gray Matter?"}, {"answer": 2, "options": ["Only soft tissue windows", "Only bone windows", "Both soft tissue and bone windowed images", "Contrast-enhanced images only"], "question": "For a trauma CT scan, what must the \"hard copy\" specifically include?"}, {"answer": 1, "options": ["1-mm", "5-mm", "10-mm", "12-mm"], "question": "What is the recommended slice thickness for the area from the foramen magnum to the lower third ventricle?"}, {"answer": 2, "options": ["MRI is faster", "MRI is cheaper", "MRI does not use ionizing radiation", "MRI is better for acute bone fractures"], "question": "Why is MRI preferred over CT for children or patients needing multiple follow-ups?"}, {"answer": 1, "options": ["The interpupillary line", "The line through the anterior and posterior commissure (AC-PC)", "The mid-sagittal plane", "The external auditory meatus"], "question": "In MRI parameters, the Axial sequence should be planned parallel to which line?"}, {"answer": 1, "options": ["-1000 HU", "-70 HU", "0 HU", "+30 HU"], "question": "What is the typical Hounsfield Unit (HU) value for Fat?"}, {"answer": 2, "options": ["Stroke", "Head injury", "Raised intracranial pressure", "Intracranial infection"], "question": "According to the text, for which condition is the evidence that CT is helpful before a lumbar puncture described as \"very slender\"?"}, {"answer": 1, "options": ["15g total", "0.1 - 0.2 mmol/kg body weight", "5 mmol/kg body weight", "20 ml fixed dose"], "question": "What is the standard dose of Gadolinium for an MRI brain scan?"}, {"answer": 2, "options": ["Air", "Water", "Bone/Calcification", "Blood"], "question": "In the Hounsfield scale, what does +1000 HU represent?"}, {"answer": 2, "options": ["T1 Spin Echo", "T2 FLAIR", "Diffusion Weighted Imaging (DWI)", "T2 Fast Spin Echo"], "question": "Which MRI sequence is described as \"DW EPI based\" in the protocols?"}, {"answer": 3, "options": ["Blood supply", "Breakdown of the blood-brain barrier", "Sufficient extracellular space", "Previous history of seizures"], "question": "Which of these is NOT a requirement for a lesion to show contrast enhancement?"}, {"answer": 2, "options": ["Acute hemorrhage", "Skull fracture", "Demyelination and Dementia", "Large brain tumors"], "question": "CT is described as a \"poor tool\" for which of the following?"}, {"answer": 1, "options": ["256 x 256", "512 x 512", "1024 x 1024", "128 x 128"], "question": "What is the matrix size specified for the routine MRI brain protocol in the document?"}, {"answer": 1, "options": ["Longitudinal alignment line", "Horizontal alignment line", "Interpupillary line", "AC-PC line"], "question": "During MRI positioning, which alignment line should pass through the nasion?"}, {"answer": 1, "options": ["5%", "10%", "20%", "50%"], "question": "What is the \"Slice Gap\" percentage recommended for MRI brain sections?"}, {"answer": 1, "options": ["+15 HU", "+30 HU", "+45 HU", "+70 HU"], "question": "Which HU value corresponds to the density of White Matter?"}, {"answer": 2, "options": ["500 ms", "2000 ms", "4500 ms", "9000 ms"], "question": "What is the TR (Repetition Time) value for a T2 weighted MRI as per the provided parameters?"}, {"answer": 1, "options": ["The age of the patient", "The amount of blood extravasated", "The use of oral contrast", "The magnetic field strength"], "question": "In cases of suspected subarachnoid hemorrhage, CT sensitivity depends on:"}, {"answer": 1, "options": ["Ionic high-osmolar contrast", "Modern non-ionic monomeric contrast", "Barium sulfate", "Paramagnetic iron oxide"], "question": "Which contrast medium is noted as suitable for repeat sections in tumors or vascular malformations?"}, {"answer": 2, "options": ["Breathing", "Closing their eyes", "Coughing", "Thinking"], "question": "For an MRI, patients are specifically instructed to AVOID doing what during the scan?"}, {"answer": 1, "options": ["100-150 mm", "200-230 mm", "300-350 mm", "400-500 mm"], "question": "What is the FOV (Field of View) range mentioned for the MRI brain protocol?"}, {"answer": 1, "options": ["10 mm superior to the vertex", "10 mm inferior to the most caudal slice", "Directly over the orbits", "Inside the lateral ventricles"], "question": "The \"Saturation Slab\" in MRI should be positioned:"}, {"answer": 1, "options": ["CT has better contrast", "To conserve scarce MRI resources", "CT shows demyelination better", "MRI is too loud for dementia patients"], "question": "What is the main clinical reason CT is used for non-emergency cases even though MRI is better?"}];
+    const letters = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'];
+    let currentQuestionIndex = 0; let score = 0; let userAnswers = new Array(questions.length).fill(null); let timeLeft = 60; let timerInterval;
+    function startTimer() { timeLeft = 60; document.getElementById('timer').innerText = timeLeft; document.getElementById('timer-box').classList.remove('warning'); clearInterval(timerInterval); timerInterval = setInterval(() => { timeLeft--; document.getElementById('timer').innerText = timeLeft; if (timeLeft <= 10) document.getElementById('timer-box').classList.add('warning'); if (timeLeft === 0) { clearInterval(timerInterval); handleTimeUp(); } }, 1000); }
+    function handleTimeUp() { userAnswers[currentQuestionIndex] = -1; const options = document.getElementById('options-list').children; for (let i = 0; i < options.length; i++) { options[i].classList.add('disabled'); options[i].style.opacity = "0.5"; } nextQuestion(); }
+    function loadQuestion() {
+        if(questions.length === 0) { document.getElementById('main-q-area').innerHTML = `<div style="text-align:center; color:#888; margin-top:50px;"><h2 style="color:#2979ff;">المحاضرة فارغة 📭</h2><p style="margin-top:10px; font-family:'Cairo'; line-height: 1.6;">لم يتم إضافة أي أسئلة بعد.</p></div>`; document.getElementById('main-nav').style.display = 'none'; document.getElementById('timer-box').style.display = 'none'; document.getElementById('q-progress').innerText = "0 / 0"; return; }
+        const currentQuestion = questions[currentQuestionIndex]; const qText = currentQuestion.question.replace(/^\d+[\.\-]\s*/, ''); document.getElementById('question-text').innerText = (currentQuestionIndex + 1) + ". " + qText; document.getElementById('q-progress').innerText = `${currentQuestionIndex + 1} / ${questions.length}`; const optionsList = document.getElementById('options-list'); optionsList.innerHTML = ''; const isAnswered = userAnswers[currentQuestionIndex] !== null;
+        currentQuestion.options.forEach((option, index) => { const li = document.createElement('li'); li.classList.add('option'); const letter = letters[index] || ''; li.innerHTML = `<span class="opt-letter">${letter}</span> <span class="opt-text">${option}</span>`; if (isAnswered) { li.classList.add('disabled'); if (index === currentQuestion.answer) li.classList.add('correct'); if (index === userAnswers[currentQuestionIndex] && index !== currentQuestion.answer) li.classList.add('wrong'); } else { li.onclick = () => selectOption(index, li); } optionsList.appendChild(li); });
+        document.getElementById('prev-btn').disabled = currentQuestionIndex === 0; document.getElementById('next-btn').innerText = currentQuestionIndex === questions.length - 1 ? "Finish" : "Next"; if (!isAnswered) startTimer(); else { clearInterval(timerInterval); document.getElementById('timer').innerText = "-"; }
+    }
+    function selectOption(selectedIndex, element) { clearInterval(timerInterval); userAnswers[currentQuestionIndex] = selectedIndex; const currentQuestion = questions[currentQuestionIndex]; const options = document.getElementById('options-list').children; for (let i = 0; i < options.length; i++) options[i].classList.add('disabled'); if (selectedIndex === currentQuestion.answer) { element.classList.add('correct'); } else { element.classList.add('wrong'); setTimeout(() => { options[currentQuestion.answer].classList.add('correct'); }, 1000); } }
+    function nextQuestion() { if (currentQuestionIndex < questions.length - 1) { currentQuestionIndex++; loadQuestion(); } else { showResults(); } }
+    function prevQuestion() { if (currentQuestionIndex > 0) { currentQuestionIndex--; loadQuestion(); } }
+    function showResults() { clearInterval(timerInterval); document.getElementById('quiz-screen').style.display = 'none'; document.getElementById('result-screen').style.display = 'block'; score = 0; const reviewList = document.getElementById('review-list'); reviewList.innerHTML = ''; questions.forEach((q, index) => { const userAnswer = userAnswers[index]; if (userAnswer === q.answer) score++; const reviewItem = document.createElement('div'); reviewItem.classList.add('review-item'); const qText = q.question.replace(/^\d+[\.\-]\s*/, ''); let optionsHtml = ''; q.options.forEach((opt, optIndex) => { let style = 'padding:10px; margin-bottom:5px; border-radius:4px; font-family:Roboto; display:flex; gap:10px; text-align:left;'; let letterStyle = 'font-weight:bold; min-width:20px;'; if (optIndex === q.answer) style += 'background: #1b5e20; border: 1px solid #00e676; color:white;'; else if (optIndex === userAnswer && userAnswer !== q.answer) style += 'background: #b71c1c; border: 1px solid #ff1744; color:white;'; else style += 'background: #2c2c2c; color:#888; border: 1px solid #444;'; optionsHtml += `<div style="${style}"><span style="${letterStyle}">${letters[optIndex]}</span><span style="flex:1; word-wrap:break-word;">${opt}</span></div>`; }); reviewItem.innerHTML = `<div class="review-q-text">${index + 1}. ${qText}</div><div style="direction: ltr;">${optionsHtml}</div>`; reviewList.appendChild(reviewItem); }); const percentage = Math.round((score / questions.length) * 100); document.getElementById('score-text').innerText = percentage + "%"; document.getElementById('score-detail').innerText = `${score} / ${questions.length} Correct`; }
+    function restartQuiz() { currentQuestionIndex = 0; score = 0; userAnswers = new Array(questions.length).fill(null); document.getElementById('quiz-screen').style.display = 'flex'; document.getElementById('result-screen').style.display = 'none'; loadQuestion(); }
+    loadQuestion();
+</script>
+</body>
+</html>
