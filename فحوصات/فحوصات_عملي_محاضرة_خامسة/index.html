@@ -1,0 +1,104 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>اختبار MCQ</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&family=Cairo:wght@400;700&display=swap');
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; margin: 0; padding: 0; }
+        * { -ms-overflow-style: none; scrollbar-width: none; }
+        *::-webkit-scrollbar { display: none; }
+        body { font-family: 'Roboto', sans-serif; background-color: #121212; color: #e0e0e0; display: flex; justify-content: center; height: 100vh; height: 100dvh; overflow: hidden; touch-action: manipulation; }
+        .quiz-container { background-color: #1e1e1e; width: 100%; height: 100%; display: flex; flex-direction: column; padding: 20px 15px; max-width: 600px; margin: 0 auto; border-left: 1px solid #333; border-right: 1px solid #333; }
+        .header { display: flex; justify-content: space-between; align-items: center; padding-bottom: 15px; border-bottom: 1px solid #333; margin-bottom: 20px; flex-shrink: 0; }
+        .q-count { color: #888; font-size: 0.9rem; font-weight: 500; }
+        .subject-title { color: #00e676; font-family: 'Cairo', sans-serif; font-weight: bold; font-size: 1.1rem; text-align: center;}
+        .timer-box { background-color: #2c2c2c; color: #fff; padding: 6px 12px; border-radius: 4px; font-weight: bold; border: 1px solid #444; min-width: 70px; text-align: center; }
+        .timer-box.warning { background-color: #4a1818; color: #ff6b6b; border-color: #ff6b6b; }
+        .question-area { flex-grow: 1; overflow-y: auto; padding-bottom: 20px; }
+        .question-text { font-family: 'Roboto', sans-serif; font-size: 1.1rem; font-weight: bold; margin-bottom: 25px; color: #ffffff; text-align: left; line-height: 1.5; direction: ltr; word-break: break-word;}
+        .options-list { list-style: none; padding: 0; }
+        .option { background-color: #2c2c2c; border: 1px solid #444; border-radius: 8px; padding: 15px; margin-bottom: 15px; cursor: pointer; font-size: 1rem; text-align: left; transition: background 0.2s; color: #ddd; display: flex; align-items: flex-start; gap: 10px; direction: ltr; }
+        .option:active { background-color: #444; }
+        .opt-letter { font-weight: bold; color: #2979ff; min-width: 25px; display: inline-block; }
+        .opt-text { flex: 1; word-wrap: break-word; word-break: break-word; line-height: 1.4; }
+        .option.correct { background-color: #1b5e20 !important; border-color: #00e676 !important; color: #fff; }
+        .option.correct .opt-letter { color: #fff; }
+        .option.wrong { background-color: #b71c1c !important; border-color: #ff1744 !important; color: #fff; }
+        .option.wrong .opt-letter { color: #fff; }
+        .disabled { pointer-events: none; }
+        .navigation { margin-top: auto; display: flex; justify-content: space-between; padding-top: 15px; border-top: 1px solid #333; flex-shrink: 0; }
+        button { background: #2979ff; color: white; border: none; padding: 15px 30px; border-radius: 6px; font-weight: bold; text-transform: uppercase; letter-spacing: 1px; box-shadow: 0 4px 6px rgba(0,0,0,0.3); cursor: pointer;}
+        button:disabled { background-color: #444; color: #888; box-shadow: none; cursor: not-allowed; }
+        .result-screen { display: none; text-align: center; height: 100%; overflow-y: auto; width: 100%;}
+        .score-box { background: #2c2c2c; padding: 20px; border-radius: 10px; margin-bottom: 20px; border: 1px solid #444; }
+        .big-score { font-size: 3rem; font-weight: bold; color: #2979ff; display: block; }
+        .review-section { text-align: left; margin-top: 10px; direction: ltr; }
+        .review-item { background: #1e1e1e; border-bottom: 1px solid #333; padding: 15px 5px; }
+        .review-q-text { font-family: 'Roboto', sans-serif; color: #fff; margin-bottom: 10px; font-size: 1rem; font-weight: bold; word-break: break-word;}
+    </style>
+</head>
+<body>
+<div class="quiz-container">
+    <div id="quiz-screen" style="display:flex; flex-direction:column; height:100%;">
+        <div class="header" id="main-header">
+            <span class="q-count" id="q-progress"></span>
+
+            
+            <div id="titles-container" style="display:flex; flex-direction:column; align-items:center;">
+                <span class="subject-title" style="color:#2979ff; font-family:'Cairo'; font-size:1.2rem;">📄 اختبار MCQ</span>
+            </div>
+            
+
+            <div class="timer-box" id="timer-box"><span id="timer">60</span>s</div>
+        </div>
+        <div class="question-area" id="main-q-area">
+            <div class="question-text" id="question-text"></div>
+            <ul class="options-list" id="options-list"></ul>
+        </div>
+        <div class="navigation" id="main-nav">
+            <button id="prev-btn" onclick="prevQuestion()" disabled>Prev</button>
+            <button id="next-btn" onclick="nextQuestion()">Next</button>
+        </div>
+
+        
+
+    </div>
+    <div id="result-screen" class="result-screen">
+        <h2 style="color: #fff; margin-top:0;">Quiz Results</h2>
+        <div class="score-box">
+            <span class="big-score" id="score-text">0%</span>
+            <p id="score-detail" style="color:#aaa; margin:5px 0 0;">0 / 0 Correct</p>
+        </div>
+        <div class="review-section" id="review-list"></div>
+        <div style="padding: 20px 0;">
+
+            
+
+            <button onclick="restartQuiz()" style="width:100%; background:#00c853;">Restart</button>
+        </div>
+    </div>
+</div>
+<script>
+    const questions = [{"answer": 1, "options": ["Calcium scoring", "Size and chamber enlargement", "Blood oxygen levels", "Myocardial dead tissue"], "question": "What information does a plain X-ray provide regarding the heart?"}, {"answer": 1, "options": ["40%", "50%", "60%", "70%"], "question": "What is the normal cardio-thoracic (CT) ratio for adults?"}, {"answer": 2, "options": ["40%", "50%", "60%", "70%"], "question": "What is the normal cardio-thoracic (CT) ratio for neonates?"}, {"answer": 1, "options": ["If the CT ratio exceeds 40%", "If the CT ratio exceeds 50%", "If the CT ratio exceeds 60%", "If the CT ratio exceeds 70%"], "question": "When is cardiomegaly diagnosed on a frontal chest PA radiograph?"}, {"answer": 2, "options": ["Plain X-ray", "Echocardiography", "CT Scan", "MRI"], "question": "Which imaging modality is used for detecting atherosclerotic diseases using a calcium scoring system?"}, {"answer": 1, "options": ["Aortic dissection", "\"Dead\" myocardial tissue", "Pericardial effusion", "Cardiac tumors"], "question": "What can a PET scan of the heart identify, as indicated by the arrow in the provided image?"}, {"answer": 3, "options": ["Congenital heart disease", "Valve disease", "Myocardial disease and ventricular function", "All of the above"], "question": "Which of the following is an indication for cardiac angiocardiography?"}, {"answer": 1, "options": ["MRI scanner", "Biplane digital fluoroscopy with C-arms", "PET scanner", "TEE probe"], "question": "What type of equipment is used to facilitate axial projections during angiocardiography?"}, {"answer": 1, "options": ["NIH pigtail, 4-8-F", "Cournand, 4-7-F", "Seldinger catheter", "TEE probe"], "question": "Which catheter is used for pressure measurements and blood sampling?"}, {"answer": 1, "options": ["Cournand, 4-7-F", "NIH pigtail, 4-8-F", "Jugular catheter", "Introducer sheath"], "question": "Which catheter is specifically used for angiocardiography?"}, {"answer": 2, "options": ["Cephalic vein", "Basilic vein", "Femoral vein", "Antecubital vein"], "question": "In babies, which vein may be the only one large enough to take the catheter for examining right-sided structures?"}, {"answer": 3, "options": ["Cephalic vein approach", "Right antecubital approach", "Basilic vein approach", "Femoral vein approach"], "question": "If an atrial septal defect is suspected, which approach offers the best chance of passing the catheter into the left atrium?"}, {"answer": 1, "options": ["Cephalic vein only", "Right antecubital or basilic vein", "Pulmonary vein", "Jugular vein only"], "question": "In adults, which veins are typically used to introduce a catheter?"}, {"answer": 1, "options": ["It is too small in diameter.", "It is difficult to pass the catheter past where it pierces the clavipectoral fascia.", "It carries oxygenated blood.", "It connects directly to the left atrium."], "question": "Why should the cephalic vein NOT be used for catheter introduction?"}, {"answer": 0, "options": ["Seldinger technique", "Doppler technique", "Cournand technique", "Hepatoclavicular technique"], "question": "What technique is used to introduce the catheter or introducer?"}, {"answer": 1, "options": ["Because it is too rigid.", "Because it lacks an end hole for a guidewire.", "Because it causes excessive bleeding.", "Because it is used only in the cephalic vein."], "question": "Why must the NIH catheter be introduced via an introducer?"}, {"answer": 1, "options": ["Long axial oblique view", "Hepatoclavicular or four-chamber view", "AP View", "Dextrocardia view"], "question": "The 40\u00b0 cranial/40\u00b0 LAO view is also known as:"}, {"answer": 1, "options": ["Parallel", "Perpendicular", "At a 20-degree angle", "At a 90-degree caudal angle"], "question": "In the four-chamber view, how does the beam align with the long axis of the heart?"}, {"answer": 0, "options": ["25-30\u00b0 cranially and 20\u00b0 RAO", "40\u00b0 cranially and 40\u00b0 LAO", "90\u00b0 cranially", "90\u00b0 caudally"], "question": "For a long axial oblique view, how are the lateral tube and image intensifier angled?"}, {"answer": 1, "options": ["On the chest wall", "Into the mouth and down the esophagus", "Into the femoral vein", "Into the trachea"], "question": "Where is a Transesophageal echocardiography (TEE) probe placed to create pictures of the heart?"}, {"answer": 2, "options": ["Aortic Valve", "Tricuspid Valve", "Mitral Valve", "Pulmonary Valve"], "question": "Which valve\u0027s anterior and posterior leaflets are explicitly labeled in the provided M-mode echocardiogram image?"}, {"answer": 1, "options": ["Dextrocardia", "Pericardial tumor", "Ectopia cordis", "Valve regurgitation"], "question": "Which of the following pericardial diseases can be detected by a CT SCAN?"}, {"answer": 2, "options": ["Right atrium", "Right ventricle", "Left ventricle", "Left atrium"], "question": "In the provided MRI image of the heart, what does number 3 represent?"}, {"answer": 1, "options": ["Ectopia cordis", "Dextrocardia", "Cardiomegaly", "Pericardial effusion"], "question": "What condition is shown in the X-ray image where the heart is situated on the right side of the chest?"}, {"answer": 3, "options": ["Dextrocardia", "Cardiomegaly", "Aneurysmal dilatation", "Ectopia cordis"], "question": "What condition involves the heart being located outside the chest cavity, as noted in the final slide?"}];
+    const letters = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'];
+    let currentQuestionIndex = 0; let score = 0; let userAnswers = new Array(questions.length).fill(null); let timeLeft = 60; let timerInterval;
+    function startTimer() { timeLeft = 60; document.getElementById('timer').innerText = timeLeft; document.getElementById('timer-box').classList.remove('warning'); clearInterval(timerInterval); timerInterval = setInterval(() => { timeLeft--; document.getElementById('timer').innerText = timeLeft; if (timeLeft <= 10) document.getElementById('timer-box').classList.add('warning'); if (timeLeft === 0) { clearInterval(timerInterval); handleTimeUp(); } }, 1000); }
+    function handleTimeUp() { userAnswers[currentQuestionIndex] = -1; const options = document.getElementById('options-list').children; for (let i = 0; i < options.length; i++) { options[i].classList.add('disabled'); options[i].style.opacity = "0.5"; } nextQuestion(); }
+    function loadQuestion() {
+        if(questions.length === 0) { document.getElementById('main-q-area').innerHTML = `<div style="text-align:center; color:#888; margin-top:50px;"><h2 style="color:#2979ff;">المحاضرة فارغة 📭</h2><p style="margin-top:10px; font-family:'Cairo'; line-height: 1.6;">لم يتم إضافة أي أسئلة بعد.</p></div>`; document.getElementById('main-nav').style.display = 'none'; document.getElementById('timer-box').style.display = 'none'; document.getElementById('q-progress').innerText = "0 / 0"; return; }
+        const currentQuestion = questions[currentQuestionIndex]; const qText = currentQuestion.question.replace(/^\d+[\.\-]\s*/, ''); document.getElementById('question-text').innerText = (currentQuestionIndex + 1) + ". " + qText; document.getElementById('q-progress').innerText = `${currentQuestionIndex + 1} / ${questions.length}`; const optionsList = document.getElementById('options-list'); optionsList.innerHTML = ''; const isAnswered = userAnswers[currentQuestionIndex] !== null;
+        currentQuestion.options.forEach((option, index) => { const li = document.createElement('li'); li.classList.add('option'); const letter = letters[index] || ''; li.innerHTML = `<span class="opt-letter">${letter}</span> <span class="opt-text">${option}</span>`; if (isAnswered) { li.classList.add('disabled'); if (index === currentQuestion.answer) li.classList.add('correct'); if (index === userAnswers[currentQuestionIndex] && index !== currentQuestion.answer) li.classList.add('wrong'); } else { li.onclick = () => selectOption(index, li); } optionsList.appendChild(li); });
+        document.getElementById('prev-btn').disabled = currentQuestionIndex === 0; document.getElementById('next-btn').innerText = currentQuestionIndex === questions.length - 1 ? "Finish" : "Next"; if (!isAnswered) startTimer(); else { clearInterval(timerInterval); document.getElementById('timer').innerText = "-"; }
+    }
+    function selectOption(selectedIndex, element) { clearInterval(timerInterval); userAnswers[currentQuestionIndex] = selectedIndex; const currentQuestion = questions[currentQuestionIndex]; const options = document.getElementById('options-list').children; for (let i = 0; i < options.length; i++) options[i].classList.add('disabled'); if (selectedIndex === currentQuestion.answer) { element.classList.add('correct'); } else { element.classList.add('wrong'); setTimeout(() => { options[currentQuestion.answer].classList.add('correct'); }, 1000); } }
+    function nextQuestion() { if (currentQuestionIndex < questions.length - 1) { currentQuestionIndex++; loadQuestion(); } else { showResults(); } }
+    function prevQuestion() { if (currentQuestionIndex > 0) { currentQuestionIndex--; loadQuestion(); } }
+    function showResults() { clearInterval(timerInterval); document.getElementById('quiz-screen').style.display = 'none'; document.getElementById('result-screen').style.display = 'block'; score = 0; const reviewList = document.getElementById('review-list'); reviewList.innerHTML = ''; questions.forEach((q, index) => { const userAnswer = userAnswers[index]; if (userAnswer === q.answer) score++; const reviewItem = document.createElement('div'); reviewItem.classList.add('review-item'); const qText = q.question.replace(/^\d+[\.\-]\s*/, ''); let optionsHtml = ''; q.options.forEach((opt, optIndex) => { let style = 'padding:10px; margin-bottom:5px; border-radius:4px; font-family:Roboto; display:flex; gap:10px; text-align:left;'; let letterStyle = 'font-weight:bold; min-width:20px;'; if (optIndex === q.answer) style += 'background: #1b5e20; border: 1px solid #00e676; color:white;'; else if (optIndex === userAnswer && userAnswer !== q.answer) style += 'background: #b71c1c; border: 1px solid #ff1744; color:white;'; else style += 'background: #2c2c2c; color:#888; border: 1px solid #444;'; optionsHtml += `<div style="${style}"><span style="${letterStyle}">${letters[optIndex]}</span><span style="flex:1; word-wrap:break-word;">${opt}</span></div>`; }); reviewItem.innerHTML = `<div class="review-q-text">${index + 1}. ${qText}</div><div style="direction: ltr;">${optionsHtml}</div>`; reviewList.appendChild(reviewItem); }); const percentage = Math.round((score / questions.length) * 100); document.getElementById('score-text').innerText = percentage + "%"; document.getElementById('score-detail').innerText = `${score} / ${questions.length} Correct`; }
+    function restartQuiz() { currentQuestionIndex = 0; score = 0; userAnswers = new Array(questions.length).fill(null); document.getElementById('quiz-screen').style.display = 'flex'; document.getElementById('result-screen').style.display = 'none'; loadQuestion(); }
+    loadQuestion();
+</script>
+</body>
+</html>
