@@ -1,0 +1,104 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>اختبار MCQ</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&family=Cairo:wght@400;700&display=swap');
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; margin: 0; padding: 0; }
+        * { -ms-overflow-style: none; scrollbar-width: none; }
+        *::-webkit-scrollbar { display: none; }
+        body { font-family: 'Roboto', sans-serif; background-color: #121212; color: #e0e0e0; display: flex; justify-content: center; height: 100vh; height: 100dvh; overflow: hidden; touch-action: manipulation; }
+        .quiz-container { background-color: #1e1e1e; width: 100%; height: 100%; display: flex; flex-direction: column; padding: 20px 15px; max-width: 600px; margin: 0 auto; border-left: 1px solid #333; border-right: 1px solid #333; }
+        .header { display: flex; justify-content: space-between; align-items: center; padding-bottom: 15px; border-bottom: 1px solid #333; margin-bottom: 20px; flex-shrink: 0; }
+        .q-count { color: #888; font-size: 0.9rem; font-weight: 500; }
+        .subject-title { color: #00e676; font-family: 'Cairo', sans-serif; font-weight: bold; font-size: 1.1rem; text-align: center;}
+        .timer-box { background-color: #2c2c2c; color: #fff; padding: 6px 12px; border-radius: 4px; font-weight: bold; border: 1px solid #444; min-width: 70px; text-align: center; }
+        .timer-box.warning { background-color: #4a1818; color: #ff6b6b; border-color: #ff6b6b; }
+        .question-area { flex-grow: 1; overflow-y: auto; padding-bottom: 20px; }
+        .question-text { font-family: 'Roboto', sans-serif; font-size: 1.1rem; font-weight: bold; margin-bottom: 25px; color: #ffffff; text-align: left; line-height: 1.5; direction: ltr; word-break: break-word;}
+        .options-list { list-style: none; padding: 0; }
+        .option { background-color: #2c2c2c; border: 1px solid #444; border-radius: 8px; padding: 15px; margin-bottom: 15px; cursor: pointer; font-size: 1rem; text-align: left; transition: background 0.2s; color: #ddd; display: flex; align-items: flex-start; gap: 10px; direction: ltr; }
+        .option:active { background-color: #444; }
+        .opt-letter { font-weight: bold; color: #2979ff; min-width: 25px; display: inline-block; }
+        .opt-text { flex: 1; word-wrap: break-word; word-break: break-word; line-height: 1.4; }
+        .option.correct { background-color: #1b5e20 !important; border-color: #00e676 !important; color: #fff; }
+        .option.correct .opt-letter { color: #fff; }
+        .option.wrong { background-color: #b71c1c !important; border-color: #ff1744 !important; color: #fff; }
+        .option.wrong .opt-letter { color: #fff; }
+        .disabled { pointer-events: none; }
+        .navigation { margin-top: auto; display: flex; justify-content: space-between; padding-top: 15px; border-top: 1px solid #333; flex-shrink: 0; }
+        button { background: #2979ff; color: white; border: none; padding: 15px 30px; border-radius: 6px; font-weight: bold; text-transform: uppercase; letter-spacing: 1px; box-shadow: 0 4px 6px rgba(0,0,0,0.3); cursor: pointer;}
+        button:disabled { background-color: #444; color: #888; box-shadow: none; cursor: not-allowed; }
+        .result-screen { display: none; text-align: center; height: 100%; overflow-y: auto; width: 100%;}
+        .score-box { background: #2c2c2c; padding: 20px; border-radius: 10px; margin-bottom: 20px; border: 1px solid #444; }
+        .big-score { font-size: 3rem; font-weight: bold; color: #2979ff; display: block; }
+        .review-section { text-align: left; margin-top: 10px; direction: ltr; }
+        .review-item { background: #1e1e1e; border-bottom: 1px solid #333; padding: 15px 5px; }
+        .review-q-text { font-family: 'Roboto', sans-serif; color: #fff; margin-bottom: 10px; font-size: 1rem; font-weight: bold; word-break: break-word;}
+    </style>
+</head>
+<body>
+<div class="quiz-container">
+    <div id="quiz-screen" style="display:flex; flex-direction:column; height:100%;">
+        <div class="header" id="main-header">
+            <span class="q-count" id="q-progress"></span>
+
+            
+            <div id="titles-container" style="display:flex; flex-direction:column; align-items:center;">
+                <span class="subject-title" style="color:#2979ff; font-family:'Cairo'; font-size:1.2rem;">📄 اختبار MCQ</span>
+            </div>
+            
+
+            <div class="timer-box" id="timer-box"><span id="timer">60</span>s</div>
+        </div>
+        <div class="question-area" id="main-q-area">
+            <div class="question-text" id="question-text"></div>
+            <ul class="options-list" id="options-list"></ul>
+        </div>
+        <div class="navigation" id="main-nav">
+            <button id="prev-btn" onclick="prevQuestion()" disabled>Prev</button>
+            <button id="next-btn" onclick="nextQuestion()">Next</button>
+        </div>
+
+        
+
+    </div>
+    <div id="result-screen" class="result-screen">
+        <h2 style="color: #fff; margin-top:0;">Quiz Results</h2>
+        <div class="score-box">
+            <span class="big-score" id="score-text">0%</span>
+            <p id="score-detail" style="color:#aaa; margin:5px 0 0;">0 / 0 Correct</p>
+        </div>
+        <div class="review-section" id="review-list"></div>
+        <div style="padding: 20px 0;">
+
+            
+
+            <button onclick="restartQuiz()" style="width:100%; background:#00c853;">Restart</button>
+        </div>
+    </div>
+</div>
+<script>
+    const questions = [{"answer": 2, "options": ["X-ray attenuation", "Ultrasound reflection", "Nuclear magnetic resonance", "Radiation emission"], "question": "MRI is primarily based on which physical phenomenon?"}, {"answer": 2, "options": ["1944", "1952", "1970", "2003"], "question": "MRI was discovered in:"}, {"answer": 1, "options": ["Felix Bloch", "Paul C. Lauterbur", "Richard Ernst", "Kurt W\u00fcthrich"], "question": "Who discovered MRI?"}, {"answer": 2, "options": ["Carbon", "Oxygen", "Hydrogen", "Nitrogen"], "question": "MRI mainly studies which nucleus?"}, {"answer": 2, "options": ["It has neutrons", "It is rare", "It is abundant in the body", "It has no charge"], "question": "Why is hydrogen mainly used in MRI?"}, {"answer": 1, "options": ["One neutron", "One proton", "Two protons", "One proton and one neutron"], "question": "The hydrogen nucleus consists of:"}, {"answer": 2, "options": ["RF pulses", "Magnetic field", "Ionizing radiation", "Gradients"], "question": "MRI does NOT use:"}, {"answer": 2, "options": ["Uses X-rays", "Uses gamma rays", "No ionizing radiation", "Uses ultrasound"], "question": "MRI is considered safe because:"}, {"answer": 1, "options": ["Bone fractures only", "Brain tumors", "Tooth decay", "Skin burns"], "question": "MRI is especially useful in detecting:"}, {"answer": 3, "options": ["Stroke", "Infection", "Dementia", "Hair loss"], "question": "MRI can detect all EXCEPT:"}, {"answer": 1, "options": ["Low cost", "High contrast resolution", "Fast scanning", "Uses radiation"], "question": "One major advantage of MRI is:"}, {"answer": 2, "options": ["Only axial plane", "Only sagittal", "Multiple planes", "Only coronal"], "question": "MRI can produce images in:"}, {"answer": 1, "options": ["Invasive", "Non-invasive", "Semi-invasive", "Surgical"], "question": "MRI is classified as:"}, {"answer": 1, "options": ["Bone and air only", "Acute and chronic phases", "Only soft tissues", "Only tumors"], "question": "MRI can differentiate between:"}, {"answer": 2, "options": ["Bone", "Metal", "Dental fillings", "Air"], "question": "MRI has no significant artifact from:"}, {"answer": 1, "options": ["Uses radiation", "Claustrophobia", "Low resolution", "Cannot detect disease"], "question": "One disadvantage of MRI is:"}, {"answer": 2, "options": ["Cheap", "Moderate cost", "Expensive", "Free"], "question": "MRI machines are:"}, {"answer": 1, "options": ["Broken bones", "Pacemakers", "Fever", "Headache"], "question": "MRI is unsafe for patients with:"}, {"answer": 2, "options": ["Clear image", "No effect", "Image distortion", "Better resolution"], "question": "Metal in the body causes:"}, {"answer": 2, "options": ["White", "Gray", "Black", "Bright"], "question": "Bone appears in MRI as:"}, {"answer": 1, "options": ["Very short", "Long", "Instant", "None"], "question": "MRI scanning time is:"}, {"answer": 1, "options": ["Silent", "Noisy", "Invisible", "Cold"], "question": "MRI scanners are:"}, {"answer": 1, "options": ["Electric field", "Magnetic field", "Gravity", "Pressure"], "question": "MRI uses strong:"}, {"answer": 1, "options": ["No motion", "Spin", "Color", "Weight only"], "question": "Subatomic particles have:"}, {"answer": 2, "options": ["Neutrons", "Electrons only", "Moving charge", "Temperature"], "question": "Magnetic moment is due to:"}, {"answer": 1, "options": ["Increase signal", "Cancel magnetic moment", "Noise", "Heat"], "question": "Spin pairing causes:"}, {"answer": 1, "options": ["No signal", "Residual magnetic moment", "Destruction", "Radiation"], "question": "Unpaired spins result in:"}, {"answer": 1, "options": ["Many electrons", "No shielding", "Heavy atom", "No proton"], "question": "Hydrogen has high magnetic moment because:"}, {"answer": 1, "options": ["Move randomly", "Align parallel or anti-parallel", "Stop moving", "Disappear"], "question": "When magnetic field is applied, protons:"}, {"answer": 1, "options": ["Straight movement", "Rotation around magnetic field", "Vibration only", "Heat production"], "question": "Precession refers to:"}, {"answer": 1, "options": ["Temperature", "Magnetic field strength", "Mass", "Time"], "question": "Precession frequency depends on:"}, {"answer": 1, "options": ["Energy and mass", "Frequency and magnetic field", "Time and distance", "Pressure and volume"], "question": "Larmor equation relates:"}, {"answer": 3, "options": ["E=mc\u00b2", "f = \u03b3\u0392\u03bf", "\u03c9 = \u03b3\u0392\u03bf", "Both B and C"], "question": "Larmor equation is:"}, {"answer": 1, "options": ["Temperature", "Larmor frequency", "Pressure", "Voltage"], "question": "RF pulse must match:"}, {"answer": 1, "options": ["RF is off", "RF matches proton frequency", "No field", "High pressure"], "question": "Resonance occurs when:"}, {"answer": 1, "options": ["Disappear", "Emit energy", "Stop spinning", "Break"], "question": "After RF is turned off, protons:"}, {"answer": 1, "options": ["Camera", "Antenna", "Lens", "Mirror"], "question": "MRI signal is detected by:"}, {"answer": 2, "options": ["Doctor", "Machine only", "Computer system", "Antenna"], "question": "Data is converted into image by:"}, {"answer": 1, "options": ["Bone density", "Proton properties", "Sound waves", "Light"], "question": "MRI images are based on:"}, {"answer": 1, "options": ["Heavy atoms", "Hydrogen abundance", "High radiation", "Low cost"], "question": "MRI is especially sensitive due to:"}];
+    const letters = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'];
+    let currentQuestionIndex = 0; let score = 0; let userAnswers = new Array(questions.length).fill(null); let timeLeft = 60; let timerInterval;
+    function startTimer() { timeLeft = 60; document.getElementById('timer').innerText = timeLeft; document.getElementById('timer-box').classList.remove('warning'); clearInterval(timerInterval); timerInterval = setInterval(() => { timeLeft--; document.getElementById('timer').innerText = timeLeft; if (timeLeft <= 10) document.getElementById('timer-box').classList.add('warning'); if (timeLeft === 0) { clearInterval(timerInterval); handleTimeUp(); } }, 1000); }
+    function handleTimeUp() { userAnswers[currentQuestionIndex] = -1; const options = document.getElementById('options-list').children; for (let i = 0; i < options.length; i++) { options[i].classList.add('disabled'); options[i].style.opacity = "0.5"; } nextQuestion(); }
+    function loadQuestion() {
+        if(questions.length === 0) { document.getElementById('main-q-area').innerHTML = `<div style="text-align:center; color:#888; margin-top:50px;"><h2 style="color:#2979ff;">المحاضرة فارغة 📭</h2><p style="margin-top:10px; font-family:'Cairo'; line-height: 1.6;">لم يتم إضافة أي أسئلة بعد.</p></div>`; document.getElementById('main-nav').style.display = 'none'; document.getElementById('timer-box').style.display = 'none'; document.getElementById('q-progress').innerText = "0 / 0"; return; }
+        const currentQuestion = questions[currentQuestionIndex]; const qText = currentQuestion.question.replace(/^\d+[\.\-]\s*/, ''); document.getElementById('question-text').innerText = (currentQuestionIndex + 1) + ". " + qText; document.getElementById('q-progress').innerText = `${currentQuestionIndex + 1} / ${questions.length}`; const optionsList = document.getElementById('options-list'); optionsList.innerHTML = ''; const isAnswered = userAnswers[currentQuestionIndex] !== null;
+        currentQuestion.options.forEach((option, index) => { const li = document.createElement('li'); li.classList.add('option'); const letter = letters[index] || ''; li.innerHTML = `<span class="opt-letter">${letter}</span> <span class="opt-text">${option}</span>`; if (isAnswered) { li.classList.add('disabled'); if (index === currentQuestion.answer) li.classList.add('correct'); if (index === userAnswers[currentQuestionIndex] && index !== currentQuestion.answer) li.classList.add('wrong'); } else { li.onclick = () => selectOption(index, li); } optionsList.appendChild(li); });
+        document.getElementById('prev-btn').disabled = currentQuestionIndex === 0; document.getElementById('next-btn').innerText = currentQuestionIndex === questions.length - 1 ? "Finish" : "Next"; if (!isAnswered) startTimer(); else { clearInterval(timerInterval); document.getElementById('timer').innerText = "-"; }
+    }
+    function selectOption(selectedIndex, element) { clearInterval(timerInterval); userAnswers[currentQuestionIndex] = selectedIndex; const currentQuestion = questions[currentQuestionIndex]; const options = document.getElementById('options-list').children; for (let i = 0; i < options.length; i++) options[i].classList.add('disabled'); if (selectedIndex === currentQuestion.answer) { element.classList.add('correct'); } else { element.classList.add('wrong'); setTimeout(() => { options[currentQuestion.answer].classList.add('correct'); }, 1000); } }
+    function nextQuestion() { if (currentQuestionIndex < questions.length - 1) { currentQuestionIndex++; loadQuestion(); } else { showResults(); } }
+    function prevQuestion() { if (currentQuestionIndex > 0) { currentQuestionIndex--; loadQuestion(); } }
+    function showResults() { clearInterval(timerInterval); document.getElementById('quiz-screen').style.display = 'none'; document.getElementById('result-screen').style.display = 'block'; score = 0; const reviewList = document.getElementById('review-list'); reviewList.innerHTML = ''; questions.forEach((q, index) => { const userAnswer = userAnswers[index]; if (userAnswer === q.answer) score++; const reviewItem = document.createElement('div'); reviewItem.classList.add('review-item'); const qText = q.question.replace(/^\d+[\.\-]\s*/, ''); let optionsHtml = ''; q.options.forEach((opt, optIndex) => { let style = 'padding:10px; margin-bottom:5px; border-radius:4px; font-family:Roboto; display:flex; gap:10px; text-align:left;'; let letterStyle = 'font-weight:bold; min-width:20px;'; if (optIndex === q.answer) style += 'background: #1b5e20; border: 1px solid #00e676; color:white;'; else if (optIndex === userAnswer && userAnswer !== q.answer) style += 'background: #b71c1c; border: 1px solid #ff1744; color:white;'; else style += 'background: #2c2c2c; color:#888; border: 1px solid #444;'; optionsHtml += `<div style="${style}"><span style="${letterStyle}">${letters[optIndex]}</span><span style="flex:1; word-wrap:break-word;">${opt}</span></div>`; }); reviewItem.innerHTML = `<div class="review-q-text">${index + 1}. ${qText}</div><div style="direction: ltr;">${optionsHtml}</div>`; reviewList.appendChild(reviewItem); }); const percentage = Math.round((score / questions.length) * 100); document.getElementById('score-text').innerText = percentage + "%"; document.getElementById('score-detail').innerText = `${score} / ${questions.length} Correct`; }
+    function restartQuiz() { currentQuestionIndex = 0; score = 0; userAnswers = new Array(questions.length).fill(null); document.getElementById('quiz-screen').style.display = 'flex'; document.getElementById('result-screen').style.display = 'none'; loadQuestion(); }
+    loadQuestion();
+</script>
+</body>
+</html>
