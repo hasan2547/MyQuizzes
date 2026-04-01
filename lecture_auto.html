@@ -1,0 +1,370 @@
+
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>محاضرة مترجمة - أشعة وسونار</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #ffffff;
+            --text-color: #202124;
+            --accent-color: #0056b3;
+            --trans-bg: #f8f9fa;
+            --trans-border: #0056b3;
+            --nav-bg: #f8f9fa;
+            --highlight: #e8f0fe;
+        }
+
+        * {
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            font-family: 'Roboto', 'Cairo', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 0;
+            padding-bottom: 90px;
+            min-height: 100vh;
+            overscroll-behavior-y: none;
+        }
+
+        .content-container {
+            padding: 20px 20px;
+            max-width: 800px;
+            margin: 0 auto;
+            direction: ltr;
+        }
+
+        .text-block {
+            margin-bottom: 25px;
+            border-bottom: 1px dashed #ddd;
+            padding-bottom: 15px;
+        }
+
+        .title-text {
+            font-weight: bold;
+            font-size: 1.6rem;
+            color: #000;
+            margin-bottom: 15px;
+            display: block;
+            border-bottom: 3px solid var(--accent-color);
+            padding-bottom: 10px;
+            direction: ltr;
+        }
+
+        .sub-title {
+            font-weight: bold;
+            font-size: 1.4rem;
+            color: var(--accent-color);
+            margin-top: 20px;
+            margin-bottom: 10px;
+            display: block;
+            direction: ltr;
+        }
+
+        .english-paragraph {
+            line-height: 2.0;
+            font-size: 1.25rem;
+            color: #333;
+            margin-bottom: 8px;
+            text-align: left;
+        }
+
+        .interactive-word {
+            cursor: pointer;
+            border-bottom: 1px dotted #999;
+            transition: background 0.2s;
+        }
+        .interactive-word:hover {
+            background-color: #e3f2fd;
+            color: var(--accent-color);
+        }
+        .interactive-word:active {
+            background-color: var(--accent-color);
+            color: white;
+        }
+
+        .toggle-trans-btn {
+            background: none;
+            border: none;
+            color: #666;
+            font-family: 'Cairo', sans-serif;
+            font-size: 0.95rem;
+            font-weight: bold;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            padding: 5px 0;
+            direction: rtl;
+            width: 100%;
+            transition: color 0.2s;
+        }
+        
+        .toggle-trans-btn:hover {
+            color: var(--accent-color);
+        }
+
+        .inline-translation {
+            display: none;
+            background-color: var(--trans-bg);
+            color: #000;
+            padding: 12px;
+            border-radius: 8px;
+            margin-top: 5px;
+            border-right: 4px solid var(--trans-border);
+            font-family: 'Cairo', sans-serif;
+            font-size: 1.15rem;
+            line-height: 1.6;
+            direction: rtl;
+            text-align: justify;
+            animation: fadeIn 0.3s ease-in-out;
+        }
+
+        .lecture-image-container {
+            width: 100%;
+            margin: 20px 0;
+            text-align: center;
+        }
+        .lecture-image {
+            max-width: 100%;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            border: 1px solid #eee;
+        }
+
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 70px;
+            background-color: var(--nav-bg);
+            border-top: 1px solid #e0e0e0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 20px;
+            box-shadow: 0 -4px 15px rgba(0,0,0,0.05);
+            z-index: 1000;
+            direction: rtl;
+        }
+
+        .nav-btn {
+            background: var(--accent-color);
+            color: white;
+            border: none;
+            padding: 10px 24px;
+            border-radius: 50px;
+            font-family: 'Cairo', sans-serif;
+            font-weight: bold;
+            font-size: 1rem;
+            cursor: pointer;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+        .nav-btn:disabled {
+            background-color: #e0e0e0;
+            color: #999;
+            box-shadow: none;
+        }
+        .page-counter {
+            font-family: 'Cairo', sans-serif;
+            font-weight: bold;
+            color: #555;
+            background: #e9ecef;
+            padding: 5px 15px;
+            border-radius: 15px;
+        }
+
+        .sheet-overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.5); z-index: 2000;
+            opacity: 0; visibility: hidden; transition: all 0.3s;
+            display: flex; align-items: flex-end;
+        }
+        .sheet-overlay.active { opacity: 1; visibility: visible; }
+        .sheet-content {
+            background: white; width: 100%; padding: 25px;
+            border-top-left-radius: 25px; border-top-right-radius: 25px;
+            transform: translateY(100%); transition: transform 0.3s;
+            text-align: center;
+        }
+        .sheet-overlay.active .sheet-content { transform: translateY(0); }
+        
+        .selected-word-box {
+            background-color: #e3f2fd;
+            border: 1px solid #bbdefb;
+            padding: 15px; border-radius: 12px;
+            margin-top: 10px;
+        }
+        .sw-container {
+            display: flex; align-items: center; justify-content: center; gap: 10px; margin-bottom: 5px;
+        }
+        .audio-btn {
+            background: none; border: none; cursor: pointer; font-size: 1.5rem; color: var(--accent-color);
+        }
+        .sw-english {
+            font-family: 'Roboto', sans-serif; font-weight: bold; font-size: 1.4rem; color: var(--accent-color);
+        }
+        .sw-arabic {
+            font-family: 'Cairo', sans-serif; font-size: 1.3rem; color: #333; font-weight: bold; display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-5px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="content-container" id="contentArea"></div>
+
+    <div class="bottom-nav">
+        <button class="nav-btn" id="nextBtn" onclick="changePage(1)">التالي &#8592;</button>
+        <div class="page-counter" id="pageIndicator">1 / ?</div>
+        <button class="nav-btn" id="prevBtn" onclick="changePage(-1)">&#8594; السابق</button>
+    </div>
+
+    <div class="sheet-overlay" id="sheetOverlay" onclick="closeSheet(event)">
+        <div class="sheet-content">
+            <div style="font-family:'Cairo'; color:#666; margin-bottom:10px;">معنى الكلمة:</div>
+            <div id="selectedWordBox" class="selected-word-box">
+                <div class="sw-container">
+                    <span id="swEnglish" class="sw-english"></span>
+                    <button id="audioBtn" class="audio-btn" onclick="playAudio()">🔊</button>
+                </div>
+                <span id="swArabic" class="sw-arabic"></span>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // المتغيرات اللي البوت راح يبدلها
+        const dictionary = {"gradient coils": "ملفات التدرج المغناطيسي", "mri device": "جهاز الرنين المغناطيسي", "magnets": "مغناطيسات", "permanent magnet": "مغناطيس دائم", "resistive electromagnet": "مغناطيس كهربائي مقاوم", "superconducting electromagnet": "مغناطيس كهربائي فائق التوصيل", "uniform magnetic field": "مجال مغناطيسي منتظم", "main magnet": "مغناطيس رئيسي", "static magnetic field": "مجال مغناطيسي ثابت", "magnetic gradient": "تدرج مغناطيسي", "magnetic field": "مجال مغناطيسي", "magnitude": "مقدار", "direction": "اتجاه", "gradient": "تدرج", "change in field": "التغير في المجال", "change in distance": "التغير في المسافة", "gradient coil set": "مجموعة ملفات التدرج", "component": "مكون", "standard mri scanner": "جهاز الرنين المغناطيسي القياسي", "linear gradient magnetic fields": "مجالات مغناطيسية متدرجة خطية", "superimposed": "تتراكب", "strong uniform magnetic field": "مجال مغناطيسي منتظم قوي", "loops of wire": "حلقات من الأسلاك", "thin conductive sheets": "صفائح موصلة رفيعة", "cylindrical shell": "غلاف أسطواني", "bore": "فتحة الجهاز", "current": "تيار كهربائي", "secondary magnetic field": "مجال مغناطيسي ثانوي", "spatial encoding": "الترميز المكاني", "z, y and x axis": "المحاور Z و Y و X", "slice selection gradient (ssg)": "تدرج اختيار الشريحة (SSG)", "phase encoding gradient (peg)": "تدرج ترميز الطور (PEG)", "frequency encoding gradient (feg)": "تدرج ترميز التردد (FEG)", "mr image": "صورة الرنين المغناطيسي", "parallel slices": "شرائح متوازية", "imaged": "تصويرها", "90° pulse": "نبضة 90 درجة", "z-coil": "ملف Z", "energized": "تزويدها بالطاقة", "dc supply": "تيار مستمر", "controlled magnetic field gradient": "تدرج مجال مغناطيسي متحكم به", "z-axis": "المحور Z", "head side": "جهة الرأس", "toe side": "جهة القدم", "protons": "بروتونات", "precess": "تدور مغزلياً", "slowly": "ببطء", "faster": "أسرع", "phase coherence": "تماسك طوري", "y gradient coil": "ملف التدرج Y", "switched on": "تشغيله", "ms": "ملي ثانية", "dc voltage": "جهد تيار مستمر", "y direction": "اتجاه Y", "front to back": "من الأمام للخلف", "spins": "اللفات المغزلية", "upper (front) voxel": "الفوكسل العلوي (الأمامي)", "bottom (back) voxel": "الفوكسل السفلي (الخلفي)", "x-direction": "اتجاه X", "x-gradient coil": "ملف التدرج X", "orthogonal direction": "اتجاه متعامد", "left side": "الجانب الأيسر", "right side": "الجانب الأيمن", "practical lecture three": "المحاضرة العملية الثالثة", "dr. riyadh": "الدكتور رياض", "diagram of hardware of mri device": "مخطط الأجهزة والمكونات لجهاز الرنين المغناطيسي", "types of magnets": "أنواع المغناطيسات"};
+        const pages = [{"content": [{"text": "Practical Lecture Three", "trans": "المحاضرة العملية الثالثة", "isTitle": true, "isSubTitle": false}, {"text": "The Gradient coils", "trans": "ملفات التدرج المغناطيسي", "isTitle": false, "isSubTitle": true}, {"text": "Dr. Riyadh", "trans": "الدكتور رياض", "isTitle": false, "isSubTitle": false}]}, {"content": [{"text": "Diagram Of Hardware Of MRI Device", "trans": "مخطط الأجهزة والمكونات لجهاز الرنين المغناطيسي", "isTitle": true, "isSubTitle": false}]}, {"content": [{"text": "Types of Magnets", "trans": "أنواع المغناطيسات", "isTitle": true, "isSubTitle": false}, {"text": "There Are Three Types Of Magnet;", "trans": "هناك ثلاث أنواع من المغناطيسات، وهي:", "isTitle": false, "isSubTitle": false}, {"text": "1. Permanent magnet.", "trans": "1. المغناطيس الدائم.", "isTitle": false, "isSubTitle": false}, {"text": "2. Resistive electromagnet.", "trans": "2. المغناطيس الكهربائي المقاوم.", "isTitle": false, "isSubTitle": false}, {"text": "3. Superconducting electromagnet.", "trans": "3. المغناطيس الكهربائي فائق التوصيل.", "isTitle": false, "isSubTitle": false}, {"text": "The uniform magnetic field is produced by a main magnet which called Static magnetic field", "trans": "المجال المغناطيسي المنتظم يتولد بواسطة مغناطيس رئيسي، اللي يسمونه المجال المغناطيسي الثابت.", "isTitle": false, "isSubTitle": false}]}, {"content": [{"text": "Gradient coils", "trans": "ملفات التدرج المغناطيسي", "isTitle": true, "isSubTitle": false}, {"text": "• A magnetic gradient is said to exist whenever a magnetic field differs in magnitude or direction between two points in space.", "trans": "نقول عن التدرج المغناطيسي إنه موجود كلما اختلف المجال المغناطيسي في مقداره أو اتجاهه بين نقطتين في الفراغ.", "isTitle": false, "isSubTitle": false}, {"text": "• The gradient (G) is defined as the change in field (ΔB) divided by the change in distance (Δs).", "trans": "يُعرّف التدرج (G) على أنه التغير في المجال (ΔB) مقسومًا على التغير في المسافة (Δs).", "isTitle": false, "isSubTitle": false}]}, {"content": [{"text": "Gradient coils", "trans": "ملفات التدرج المغناطيسي", "isTitle": true, "isSubTitle": false}, {"text": "• A gradient coil set is an important component in a standard MRI scanner which produces linear gradient magnetic fields that are superimposed over a strong uniform magnetic field.", "trans": "مجموعة ملفات التدرج هي مكون مهم بجهاز الرنين المغناطيسي القياسي (standard MRI scanner)، واللي تنتج مجالات مغناطيسية متدرجة خطية تتراكب (تُضاف) فوق مجال مغناطيسي منتظم وقوي.", "isTitle": false, "isSubTitle": false}, {"text": "• Gradients coils are loops of wire or thin conductive sheets on a cylindrical shell lying just inside the bore of an MR scanner. When current is passed through these coils a secondary magnetic field is created.", "trans": "ملفات التدرج هي حلقات من الأسلاك أو صفائح موصلة رفيعة تكون موجودة على غلاف أسطواني صاير بالضبط داخل فتحة جهاز الرنين المغناطيسي (bore). لمن يمر تيار كهربائي بهاي الملفات، راح يتكون مجال مغناطيسي ثانوي.", "isTitle": false, "isSubTitle": false}, {"text": "•", "trans": "", "isTitle": false, "isSubTitle": false}]}, {"content": [{"text": "Spatial Encoding", "trans": "الترميز المكاني", "isTitle": true, "isSubTitle": false}, {"text": "• Three sets of gradients are used along z, y and x axis and they are named as", "trans": "ثلاث مجموعات من التدرجات تستخدم على طول المحاور z و y و x، وأسماؤها كالتالي:", "isTitle": false, "isSubTitle": false}, {"text": "• Slice Selection Gradient (SSG)", "trans": "تدرج اختيار الشريحة (SSG)", "isTitle": false, "isSubTitle": false}, {"text": "• Phase Encoding Gradient (PEG)", "trans": "تدرج ترميز الطور (PEG)", "isTitle": false, "isSubTitle": false}, {"text": "• Frequency Encoding Gradient (FEG)", "trans": "تدرج ترميز التردد (FEG)", "isTitle": false, "isSubTitle": false}]}, {"content": [{"text": "Slice Selection Gradient (SSG)", "trans": "تدرج اختيار الشريحة (SSG)", "isTitle": true, "isSubTitle": false}, {"text": "• MR image is made up of a series of parallel slices, which are imaged in turn. Along with a 90° pulse, the pair of Z-coil is energized with a DC supply .This produces a controlled magnetic field gradient along a z-axis. The total magnetic field increases at the head side and decreases at the toe side, Protons at precess at the toe side slowly, and are faster at the head side,", "trans": "صورة الرنين المغناطيسي تتكون من سلسلة شرائح متوازية، ويتم تصويرها بالتسلسل. ويا نبضة 90 درجة، زوج ملفات الـ Z يتم تزويدها بتيار مستمر (DC supply). هذا الشي ينتج تدرج مجال مغناطيسي متحكم به على طول المحور Z. المجال المغناطيسي الكلي يزيد بجهة الرأس ويقل بجهة القدم، فالبروتونات تدور مغزلياً بجهة القدم ببطء، وتكون أسرع بجهة الرأس.", "isTitle": false, "isSubTitle": false}]}, {"content": [{"text": "Phase Encoding Gradient", "trans": "تدرج ترميز الطور", "isTitle": true, "isSubTitle": false}, {"text": "• The second step in spatial encoding consists in applying a phase encoding gradient. The protons in the slice are excited initially by 90° pulse, which is in phase coherence. the Y gradient coil is switched on for a few ms by DC voltage It produces magnetic field gradient, along y direction (front to back). Spins in the upper (front) voxel precess faster, and that are in the bottom (back) precess slowly.", "trans": "الخطوة الثانية بالترميز المكاني هي تطبيق تدرج ترميز الطور. البروتونات اللي بالشريحة يتم تهييجها بالبداية بواسطة نبضة 90 درجة، اللي تكون بحالة تماسك طوري. ملف التدرج Y يتشغل لكم ميلي ثانية بواسطة جهد تيار مستمر. هذا الشي ينتج تدرج مجال مغناطيسي، على طول اتجاه Y (من الأمام للخلف). اللفات المغزلية (Spins) بالفوكسل العلوي (الأمامي) تدور مغزلياً أسرع، واللي بالأسفل (الخلفي) تدور مغزلياً ببطء.", "isTitle": false, "isSubTitle": false}]}, {"content": [{"text": "Frequency Encoding Gradient", "trans": "تدرج ترميز التردد", "isTitle": true, "isSubTitle": false}, {"text": "• The final step in spatial encoding consists in applying a frequency encoding gradient (FEG). When the gradient field is applied in X- the direction, the X-gradient coil is energized and applied in the orthogonal direction. Spins on the left side precess slowly, and those in right precess faster.", "trans": "الخطوة الأخيرة بالترميز المكاني هي تطبيق تدرج ترميز التردد (FEG). لمن يتم تطبيق مجال التدرج باتجاه X، ملف التدرج X يتم تزويده بالطاقة ويطبق باتجاه متعامد. اللفات المغزلية (Spins) اللي بالجانب الأيسر تدور مغزلياً ببطء، واللي بالجانب الأيمن تدور مغزلياً أسرع.", "isTitle": false, "isSubTitle": false}]}];
+
+        let currentIndex = 0;
+
+        function renderPage() {
+            const container = document.getElementById('contentArea');
+            const data = pages[currentIndex];
+            
+            document.getElementById('pageIndicator').innerText = `${currentIndex + 1} / ${pages.length}`;
+            document.getElementById('prevBtn').disabled = currentIndex === 0;
+            document.getElementById('nextBtn').disabled = currentIndex === pages.length - 1;
+
+            let html = '';
+            
+            data.content.forEach((item, idx) => {
+                if (item.type === 'image') {
+                    html += `
+                        <div class="lecture-image-container">
+                            <img src="${item.src}" alt="Lecture Figure" class="lecture-image">
+                        </div>
+                    `;
+                } else {
+                    let cssClass = "english-paragraph";
+                    if (item.isTitle) cssClass = "title-text";
+                    if (item.isSubTitle) cssClass = "sub-title";
+
+                    const lines = item.text.split('\n');
+                    let formattedBlock = '';
+                    
+                    lines.forEach(line => {
+                        const words = line.split(' ');
+                        let interactiveText = '';
+                        words.forEach(word => {
+                            const cleanWordForLookup = word.replace(/[.,()?!:;“”"°\[\]*\-0-9]/g, '').toLowerCase();
+                            
+                            if (cleanWordForLookup && /[a-z]/i.test(cleanWordForLookup)) {
+                                interactiveText += `<span class="interactive-word" onclick="showWordMeaning('${cleanWordForLookup}', '${word.replace(/'/g, "\'")}')">${word}</span> `;
+                            } else {
+                                interactiveText += `${word} `; 
+                            }
+                        });
+                        formattedBlock += `<div>${interactiveText}</div>`;
+                    });
+
+                    let transFormatted = item.trans.replace(/\n/g, '<br>');
+
+                    html += `
+                        <div class="text-block">
+                            <div class="${cssClass}">
+                                ${formattedBlock}
+                            </div>
+                            <button class="toggle-trans-btn" onclick="toggleTranslation('trans-${idx}')">
+                                إظهار الترجمة &#11015;
+                            </button>
+                            <div id="trans-${idx}" class="inline-translation">
+                                ${transFormatted}
+                            </div>
+                        </div>
+                    `;
+                }
+            });
+
+            container.innerHTML = html;
+            window.scrollTo(0,0);
+        }
+
+        function toggleTranslation(id) {
+            const el = document.getElementById(id);
+            if (el.style.display === "block") {
+                el.style.display = "none";
+            } else {
+                el.style.display = "block";
+            }
+        }
+
+        let currentWordForAudio = "";
+
+        function showWordMeaning(cleanWord, originalWord) {
+            const translation = dictionary[cleanWord] || "---"; 
+            
+            currentWordForAudio = originalWord.replace(/[.,()?!:;“”"°\[\]*|]/g, '');
+
+            const box = document.getElementById('selectedWordBox');
+            const enSpan = document.getElementById('swEnglish');
+            const arSpan = document.getElementById('swArabic');
+
+            enSpan.innerText = currentWordForAudio; 
+            arSpan.innerText = translation;
+
+            const overlay = document.getElementById('sheetOverlay');
+            overlay.classList.add('active');
+        }
+
+        function playAudio() {
+            if (currentWordForAudio) {
+                const utterance = new SpeechSynthesisUtterance(currentWordForAudio);
+                utterance.lang = 'en-US'; 
+                window.speechSynthesis.speak(utterance);
+            }
+        }
+
+        function closeSheet(e) {
+            if (e.target.id === 'sheetOverlay') {
+                const overlay = document.getElementById('sheetOverlay');
+                overlay.classList.remove('active');
+            }
+        }
+
+        // الانتظار حتى يكتمل تحميل الصفحة
+        window.onload = function() {
+            if(pages && pages.length > 0) {
+                renderPage();
+            } else {
+                document.getElementById('contentArea').innerHTML = "<h3>لا توجد بيانات لعرضها</h3>";
+            }
+        };
+
+    </script>
+</body>
+</html>
