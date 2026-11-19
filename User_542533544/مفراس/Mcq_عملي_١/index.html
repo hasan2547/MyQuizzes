@@ -1,0 +1,94 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>اختبار MCQ</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&family=Cairo:wght@400;700&display=swap');
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; margin: 0; padding: 0; }
+        * { -ms-overflow-style: none; scrollbar-width: none; }
+        *::-webkit-scrollbar { display: none; }
+        body { font-family: 'Roboto', sans-serif; background-color: #121212; color: #e0e0e0; display: flex; justify-content: center; height: 100vh; height: 100dvh; overflow: hidden; touch-action: manipulation; }
+        .quiz-container { background-color: #1e1e1e; width: 100%; height: 100%; display: flex; flex-direction: column; padding: 20px 15px; max-width: 600px; margin: 0 auto; border-left: 1px solid #333; border-right: 1px solid #333; }
+        .header { display: flex; justify-content: space-between; align-items: center; padding-bottom: 15px; border-bottom: 1px solid #333; margin-bottom: 20px; flex-shrink: 0; }
+        .q-count { color: #888; font-size: 0.9rem; font-weight: 500; }
+        .subject-title { color: #2979ff; font-family: 'Cairo', sans-serif; font-weight: bold; font-size: 1.2rem; text-align: center;}
+        .timer-box { background-color: #2c2c2c; color: #fff; padding: 6px 12px; border-radius: 4px; font-weight: bold; border: 1px solid #444; min-width: 70px; text-align: center; }
+        .timer-box.warning { background-color: #4a1818; color: #ff6b6b; border-color: #ff6b6b; }
+        .question-area { flex-grow: 1; overflow-y: auto; padding-bottom: 20px; }
+        .question-text { font-family: 'Roboto', sans-serif; font-size: 1.1rem; font-weight: bold; margin-bottom: 25px; color: #ffffff; text-align: left; line-height: 1.5; direction: ltr; word-break: break-word;}
+        .options-list { list-style: none; padding: 0; }
+        .option { background-color: #2c2c2c; border: 1px solid #444; border-radius: 8px; padding: 15px; margin-bottom: 15px; cursor: pointer; font-size: 1rem; text-align: left; transition: background 0.2s; color: #ddd; display: flex; align-items: flex-start; gap: 10px; direction: ltr; }
+        .option:active { background-color: #444; }
+        .opt-letter { font-weight: bold; color: #2979ff; min-width: 25px; display: inline-block; }
+        .opt-text { flex: 1; word-wrap: break-word; word-break: break-word; line-height: 1.4; }
+        .option.correct { background-color: #1b5e20 !important; border-color: #00e676 !important; color: #fff; }
+        .option.correct .opt-letter { color: #fff; }
+        .option.wrong { background-color: #b71c1c !important; border-color: #ff1744 !important; color: #fff; }
+        .option.wrong .opt-letter { color: #fff; }
+        .disabled { pointer-events: none; }
+        .navigation { margin-top: auto; display: flex; justify-content: space-between; padding-top: 15px; border-top: 1px solid #333; flex-shrink: 0; }
+        button { background: #2979ff; color: white; border: none; padding: 15px 30px; border-radius: 6px; font-weight: bold; text-transform: uppercase; letter-spacing: 1px; box-shadow: 0 4px 6px rgba(0,0,0,0.3); cursor: pointer;}
+        button:disabled { background-color: #444; color: #888; box-shadow: none; cursor: not-allowed; }
+        .result-screen { display: none; text-align: center; height: 100%; overflow-y: auto; width: 100%;}
+        .score-box { background: #2c2c2c; padding: 20px; border-radius: 10px; margin-bottom: 20px; border: 1px solid #444; }
+        .big-score { font-size: 3rem; font-weight: bold; color: #2979ff; display: block; }
+        .review-section { text-align: left; margin-top: 10px; direction: ltr; }
+        .review-item { background: #1e1e1e; border-bottom: 1px solid #333; padding: 15px 5px; }
+        .review-q-text { font-family: 'Roboto', sans-serif; color: #fff; margin-bottom: 10px; font-size: 1rem; font-weight: bold; word-break: break-word;}
+    </style>
+</head>
+<body>
+<div class="quiz-container">
+    <div id="quiz-screen" style="display:flex; flex-direction:column; height:100%;">
+        <div class="header" id="main-header">
+            <span class="q-count" id="q-progress"></span>
+            <div id="titles-container" style="display:flex; flex-direction:column; align-items:center;">
+                <span class="subject-title">📄 Mcq_عملي_١</span>
+            </div>
+            <div class="timer-box" id="timer-box"><span id="timer">60</span>s</div>
+        </div>
+        <div class="question-area" id="main-q-area">
+            <div class="question-text" id="question-text"></div>
+            <ul class="options-list" id="options-list"></ul>
+        </div>
+        <div class="navigation" id="main-nav">
+            <button id="prev-btn" onclick="prevQuestion()" disabled>Prev</button>
+            <button id="next-btn" onclick="nextQuestion()">Next</button>
+        </div>
+    </div>
+    <div id="result-screen" class="result-screen">
+        <h2 style="color: #fff; margin-top:0;">Quiz Results</h2>
+        <div class="score-box">
+            <span class="big-score" id="score-text">0%</span>
+            <p id="score-detail" style="color:#aaa; margin:5px 0 0;">0 / 0 Correct</p>
+        </div>
+        <div class="review-section" id="review-list"></div>
+        <div style="padding: 20px 0;">
+            <button onclick="restartQuiz()" style="width:100%; background:#00c853;">Restart</button>
+        </div>
+    </div>
+</div>
+<script>
+    const questions = [{"answer": 2, "options": ["A. Superior spinal cord visualization", "B. Superior soft tissue contrast", "C. Superior bone detail", "D. Lower radiation dose", "E. Better disc visualization"], "question": "1. The primary advantage of CT over MRI in spine trauma evaluation is:"}, {"answer": 1, "options": ["A. Spinous processes", "B. Posterior longitudinal ligament", "C. Facet joints", "D. Anterior longitudinal ligament", "E. Laminae"], "question": "2. The middle column in Denis\u2019 model includes:"}, {"answer": 1, "options": ["A. Stable", "B. Unstable", "C. Self-healing", "D. Chronic", "E. Degenerative"], "question": "3. A fracture involving two or more spinal columns is:"}, {"answer": 2, "options": ["A. 5\u201310 mm", "B. 3\u20135 mm", "C. 0.5\u20131.25 mm", "D. 10\u201315 mm", "E. 7\u20138 mm"], "question": "4. Typical acquired slice thickness for CT spine is:"}, {"answer": 3, "options": ["A. Always required", "B. Never required", "C. Only required orally", "D. Usually not required", "E. Only used for lumbar studies"], "question": "5. In routine trauma spine CT, IV contrast is:"}, {"answer": 3, "options": ["A. Axial", "B. Coronal", "C. Oblique", "D. Sagittal", "E. Scout"], "question": "6. Best plane for evaluating alignment:"}, {"answer": 2, "options": ["A. Hyperextension", "B. Flexion-distraction", "C. Axial loading", "D. Rotation", "E. Compression with rotation"], "question": "7. A burst fracture is caused by:"}, {"answer": 0, "options": ["A. Seatbelt injuries", "B. Diving accidents", "C. Heavy lifting", "D. Gunshot wounds", "E. Infection"], "question": "8. A Chance fracture is associated with:"}, {"answer": 2, "options": ["A. Bone window", "B. Lung window", "C. Soft tissue window", "D. Brain window", "E. Abdomen window"], "question": "9. To assess discs and cord, use:"}, {"answer": 1, "options": ["A. 300", "B. 2000", "C. 50", "D. 700", "E. 100"], "question": "10. Typical bone window width:"}, {"answer": 0, "options": ["A. Skull base to T1", "B. C3 to L3", "C. Skull base to L1", "D. C1 to S1", "E. C7 to L5"], "question": "11. Cervical CT coverage:"}, {"answer": 1, "options": ["A. Without contrast", "B. With IV contrast", "C. Oral contrast only", "D. MRI only", "E. Oral + IV contrast"], "question": "12. Infection evaluation uses:"}, {"answer": 2, "options": ["A. Always stable", "B. Usually stable", "C. Unstable and serious", "D. Normal variant", "E. Only in lumbar spine"], "question": "13. A teardrop fracture is:"}, {"answer": 0, "options": ["A. Axial", "B. Coronal", "C. Oblique sagittal", "D. Scout", "E. 3D"], "question": "14. Best plane for neural foraminal narrowing:"}, {"answer": 3, "options": ["A. C1\u2013C2", "B. C2\u2013C3", "C. C5\u2013C6", "D. C7\u2013T1", "E. T1\u2013T2"], "question": "15. Shoulder interference affects:"}, {"answer": 2, "options": ["A. Ligamentum flavum", "B. Posterior longitudinal ligament", "C. Anterior longitudinal ligament", "D. Interspinous ligament", "E. Supraspinous ligament"], "question": "16. Ligament preventing hyperextension:"}, {"answer": 2, "options": ["A. Disc inflammation", "B. Cord edema", "C. Calcified disc herniation", "D. Ligament tears", "E. Spinal cord tumors"], "question": "17. CT best detects:"}, {"answer": 2, "options": ["A. 80", "B. 100", "C. 120", "D. 60", "E. 200"], "question": "18. Typical CT spine kVp:"}, {"answer": 1, "options": ["A. Beam hardening", "B. Lucent halo around screws", "C. Contrast extravasation", "D. Bolus failure", "E. Edema only"], "question": "19. Hardware loosening appears as:"}, {"answer": 1, "options": ["A. Burst fracture", "B. Compression fracture", "C. Chance fracture", "D. Facet dislocation", "E. Odontoid fracture"], "question": "20. Wedge-shaped vertebra suggests:"}, {"answer": 1, "options": ["A. Sagittal", "B. Coronal", "C. Axial", "D. Oblique", "E. Scout"], "question": "21. Best plane to assess scoliosis:"}, {"answer": 1, "options": ["A. Osteoporosis", "B. Sclerotic", "C. Infective", "D. Hemangioma", "E. Osteolytic only"], "question": "22. Blastic metastasis appears:"}, {"answer": 0, "options": ["A. Hypodense / bone destruction", "B. Dense \u0026 bright", "C. Isoattenuating", "D. Gas-filled", "E. Fully calcified"], "question": "23. Lytic metastasis appears:"}, {"answer": 1, "options": ["A. Calcified", "B. Vascularized fibrous tissue", "C. Fat", "D. Air", "E. Bone"], "question": "24. Post-operative scar enhances because it is:"}, {"answer": 1, "options": ["A. Very high (\u003e2)", "B. Low (\u003c1)", "C. Exactly 3", "D. Zero", "E. Not relevant"], "question": "25. Pitch for spine scanning should be:"}, {"answer": 1, "options": ["A. Cord signal", "B. Canal diameter", "C. Muscle density", "D. Blood vessels", "E. Bone marrow density"], "question": "26. Spinal stenosis is evaluated by:"}, {"answer": 2, "options": ["A. Anterior", "B. Middle", "C. Posterior", "D. Central", "E. Superior"], "question": "27. Facet joints belong to which column?"}, {"answer": 2, "options": ["A. Stable disease", "B. Arthritis", "C. Cervical dislocation injury", "D. Normal anatomy", "E. Metastatic collapse"], "question": "28. Perched facets indicate:"}, {"answer": 1, "options": ["A. Dark", "B. Bright (high attenuation)", "C. Similar to fat", "D. Same as CSF", "E. Same as air"], "question": "29. Cortical bone on CT appears:"}, {"answer": 2, "options": ["A. CT without contrast", "B. CT with contrast", "C. MRI", "D. X-ray", "E. Ultrasound"], "question": "30. Best study for disc herniation:"}];
+    const letters = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'];
+    let currentQuestionIndex = 0; let score = 0; let userAnswers = new Array(questions.length).fill(null); let timeLeft = 60; let timerInterval;
+    function startTimer() { timeLeft = 60; document.getElementById('timer').innerText = timeLeft; document.getElementById('timer-box').classList.remove('warning'); clearInterval(timerInterval); timerInterval = setInterval(() => { timeLeft--; document.getElementById('timer').innerText = timeLeft; if (timeLeft <= 10) document.getElementById('timer-box').classList.add('warning'); if (timeLeft === 0) { clearInterval(timerInterval); handleTimeUp(); } }, 1000); }
+    function handleTimeUp() { userAnswers[currentQuestionIndex] = -1; const options = document.getElementById('options-list').children; for (let i = 0; i < options.length; i++) { options[i].classList.add('disabled'); options[i].style.opacity = "0.5"; } nextQuestion(); }
+    function loadQuestion() {
+        if(questions.length === 0) { document.getElementById('main-q-area').innerHTML = `<div style="text-align:center; color:#888; margin-top:50px;"><h2 style="color:#2979ff;">المحاضرة فارغة 📭</h2><p style="margin-top:10px; font-family:'Cairo'; line-height: 1.6;">لم يتم إضافة أي أسئلة بعد.</p></div>`; document.getElementById('main-nav').style.display = 'none'; document.getElementById('timer-box').style.display = 'none'; document.getElementById('q-progress').innerText = "0 / 0"; return; }
+        const currentQuestion = questions[currentQuestionIndex]; const qText = currentQuestion.question.replace(/^\d+[\.\-]\s*/, ''); document.getElementById('question-text').innerText = (currentQuestionIndex + 1) + ". " + qText; document.getElementById('q-progress').innerText = `${currentQuestionIndex + 1} / ${questions.length}`; const optionsList = document.getElementById('options-list'); optionsList.innerHTML = ''; const isAnswered = userAnswers[currentQuestionIndex] !== null;
+        currentQuestion.options.forEach((option, index) => { const li = document.createElement('li'); li.classList.add('option'); const letter = letters[index] || ''; li.innerHTML = `<span class="opt-letter">${letter}</span> <span class="opt-text">${option}</span>`; if (isAnswered) { li.classList.add('disabled'); if (index === currentQuestion.answer) li.classList.add('correct'); if (index === userAnswers[currentQuestionIndex] && index !== currentQuestion.answer) li.classList.add('wrong'); } else { li.onclick = () => selectOption(index, li); } optionsList.appendChild(li); });
+        document.getElementById('prev-btn').disabled = currentQuestionIndex === 0; document.getElementById('next-btn').innerText = currentQuestionIndex === questions.length - 1 ? "Finish" : "Next"; if (!isAnswered) startTimer(); else { clearInterval(timerInterval); document.getElementById('timer').innerText = "-"; }
+    }
+    function selectOption(selectedIndex, element) { clearInterval(timerInterval); userAnswers[currentQuestionIndex] = selectedIndex; const currentQuestion = questions[currentQuestionIndex]; const options = document.getElementById('options-list').children; for (let i = 0; i < options.length; i++) options[i].classList.add('disabled'); if (selectedIndex === currentQuestion.answer) { element.classList.add('correct'); } else { element.classList.add('wrong'); setTimeout(() => { options[currentQuestion.answer].classList.add('correct'); }, 1000); } }
+    function nextQuestion() { if (currentQuestionIndex < questions.length - 1) { currentQuestionIndex++; loadQuestion(); } else { showResults(); } }
+    function prevQuestion() { if (currentQuestionIndex > 0) { currentQuestionIndex--; loadQuestion(); } }
+    function showResults() { clearInterval(timerInterval); document.getElementById('quiz-screen').style.display = 'none'; document.getElementById('result-screen').style.display = 'block'; score = 0; const reviewList = document.getElementById('review-list'); reviewList.innerHTML = ''; questions.forEach((q, index) => { const userAnswer = userAnswers[index]; if (userAnswer === q.answer) score++; const reviewItem = document.createElement('div'); reviewItem.classList.add('review-item'); const qText = q.question.replace(/^\d+[\.\-]\s*/, ''); let optionsHtml = ''; q.options.forEach((opt, optIndex) => { let style = 'padding:10px; margin-bottom:5px; border-radius:4px; font-family:Roboto; display:flex; gap:10px; text-align:left;'; let letterStyle = 'font-weight:bold; min-width:20px;'; if (optIndex === q.answer) style += 'background: #1b5e20; border: 1px solid #00e676; color:white;'; else if (optIndex === userAnswer && userAnswer !== q.answer) style += 'background: #b71c1c; border: 1px solid #ff1744; color:white;'; else style += 'background: #2c2c2c; color:#888; border: 1px solid #444;'; optionsHtml += `<div style="${style}"><span style="${letterStyle}">${letters[optIndex]}</span><span style="flex:1; word-wrap:break-word;">${opt}</span></div>`; }); reviewItem.innerHTML = `<div class="review-q-text">${index + 1}. ${qText}</div><div style="direction: ltr;">${optionsHtml}</div>`; reviewList.appendChild(reviewItem); }); const percentage = Math.round((score / questions.length) * 100); document.getElementById('score-text').innerText = percentage + "%"; document.getElementById('score-detail').innerText = `${score} / ${questions.length} Correct`; }
+    function restartQuiz() { currentQuestionIndex = 0; score = 0; userAnswers = new Array(questions.length).fill(null); document.getElementById('quiz-screen').style.display = 'flex'; document.getElementById('result-screen').style.display = 'none'; loadQuestion(); }
+    loadQuestion();
+</script>
+</body>
+</html>
